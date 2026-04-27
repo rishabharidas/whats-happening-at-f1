@@ -6,4 +6,6 @@ export interface SessionDetails {
   date_start: string;
   circuit_short_name: string;
   country_code: string;
+  country_name: string;
+  location: string;
 }

@@ -20,7 +20,7 @@ export default async function Results({ drivers }: { drivers: Driver[] }) {
   );
   const results = await results_response.json();
 
-  const resultData = results.map((result) => ({
+  const resultData = results.map((result: { driver_number: number; session_key: string }) => ({
     ...result,
     ...drivers.find(
       (driver) =>
@@ -43,7 +43,7 @@ export default async function Results({ drivers }: { drivers: Driver[] }) {
         </h2>
       </div>
 
-      <div className="flex items-end justify-center w-full max-w-4xl gap-2 md:gap-6 h-[400px]">
+      <div className="flex items-end justify-center w-full max-w-4xl gap-2 md:gap-6 h-100">
         {podiumOrder.map((driver, index) => {
           const isWinner = driver?.position === 1;
           const heightClass = isWinner
@@ -55,8 +55,8 @@ export default async function Results({ drivers }: { drivers: Driver[] }) {
 
           return (
             <div
-              key={driver?.driver_number}
-              className="relative flex flex-col items-center flex-1 max-w-[200px]"
+              key={index}
+              className="relative flex flex-col items-center flex-1 max-w-50"
             >
               {/* Driver Image with "Pop-out" effect */}
               <div

@@ -63,7 +63,7 @@ export default async function UpcomingSession({
         </div>
 
         <div className="flex-1 p-8 flex flex-col justify-center relative">
-          <span className="absolute right-4 bottom-0 text-7xl font-black text-white/[0.03] italic pointer-events-none uppercase">
+          <span className="absolute right-4 bottom-0 text-7xl font-black text-white/3 italic pointer-events-none uppercase">
             UPNEXT
           </span>
           <div className="relative z-10">
