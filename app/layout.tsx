@@ -30,7 +30,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col relative">
         <NavigationBar />
-        <div className="mt-16 px-4 md:px-16 w-full">
+        <div className="mt-16 px-0 md:px-16 w-full">
           {children}
         </div>
       </body>
