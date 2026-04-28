@@ -1,26 +1,68 @@
 # 🏎️ WhatsHappening@F1
 
-A high-performance Formula 1 dashboard built with Next.js, featuring real-time data visualization, race results, and championship standings. Designed for speed, precision, and the ultimate fan experience.
+A high-performance Formula 1 dashboard built with **Next.js**, featuring real-time data visualization, race results, and championship standings. Designed for speed, precision, and the ultimate fan experience.
 
-![F1 Dashboard Preview](https://via.placeholder.com/1200x600/0a0a0a/white?text=WHATS+HAPPENING+@+F1+DASHBOARD)
+---
 
-## ⚡ Features
 
-- **Race Weekend Hub:** Dynamic countdowns and schedules for upcoming Grand Prix sessions.
-- **Interactive Podium:** Visual race results with team-colored pedestals and driver headshots.
-- **Live Standings:** Real-time World Drivers' Championship (WDC) and Constructors' Championship tracking.
-- **Responsive Design:** Fully optimized for mobile and desktop viewing with an F1-inspired "Speed" aesthetic.
-- **Data-Driven:** Powered by live telemetry and historical data.
+## ⚡ Key Features
+
+* **Race Weekend Hub:** Dynamic ticket-style countdowns and schedules for upcoming Grand Prix sessions.
+* **Interactive Podium:** Visual race results with "pop-out" driver headshots and team-colored pedestals.
+* **Live Standings:** Real-time World Drivers' Championship (WDC) tracking with team-specific accent stripes.
+* **Dynamic Hero:** An aggressive, F1-branded landing section that highlights current racing status.
+* **Responsive UI:** Fully optimized for mobile and desktop viewing using a high-contrast dark aesthetic.
+
 
 ## 🛠️ Tech Stack
 
-- **Framework:** [Next.js 15+](https://nextjs.org/) (App Router)
-- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
-- **Icons & Graphics:** Custom SVG accents and F1-style typography
-- **Data Source:** [OpenF1 API](https://openf1.org/)
+* **Framework:** [Next.js](https://nextjs.org/) (App Router)
+* **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+* **Fonts:** Geist Sans & Geist Mono (Optimized via `next/font`)
+* **Data Source:** [OpenF1 API](https://openf1.org/)
+
 
 ## 🚀 Getting Started
 
-1. **Clone the repository:**
-   ```bash
-   git clone [https://github.com/your-username/whats-happening-f1.git](https://github.com/your-username/whats-happening-f1.git)
+First, run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
+
+
+## 📊 Project Structure
+
+/components/Results: The 3D Podium component.
+
+/components/Standings: The WDC leaderboard with team branding.
+
+/components/UpcomingSession: The race weekend schedule and ticket-style countdown.
+
+/utils/api: Centralized API wrapper for the OpenF1 endpoints.
+
+
+## 🏁 Credits & Data
+
+Data Source
+`This project is powered by the OpenF1 API, an incredible open-source project providing real-time and historical Formula 1 data.`
+
+
+### Design Guiding Principles
+Speed: Heavy use of italics and skewed elements.
+
+Precision: Clean borders, tabular numbers for points, and high-contrast typography.
+
+Identity: Dynamic team colors pulled directly from the API to skin the UI components.
+
+
+## ⚖️ Disclaimer
+This project is an unofficial fan application. It is not affiliated with, endorsed by, or connected to the Formula 1 group of companies, the FIA, or any specific F1 team. F1, FORMULA ONE, FORMULA 1, FIA FORMULA ONE WORLD CHAMPIONSHIP, GRAND PRIX and related marks are trade marks of Formula One Licensing B.V.
+
+Made with ❤️ for the F1 community.
