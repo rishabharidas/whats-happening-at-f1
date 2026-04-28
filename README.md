@@ -54,7 +54,7 @@ Data Source
 `This project is powered by the OpenF1 API, an incredible open-source project providing real-time and historical Formula 1 data.`
 
 
-### Design Guiding Principles
+## Design Guiding Principles
 Speed: Heavy use of italics and skewed elements.
 
 Precision: Clean borders, tabular numbers for points, and high-contrast typography.

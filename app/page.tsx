@@ -25,7 +25,7 @@ export default async function Home() {
       <main className="w-full flex flex-col items-center space-y-5">
         <section
           id="hero"
-          className="relative flex w-full flex-col gap-6 items-center justify-center h-[90vh] bg-[#0a0a0a] overflow-hidden"
+          className="relative flex w-full flex-col gap-6 items-center justify-center h-screen bg-[#0a0a0a] overflow-hidden"
         >
           {/* Decorative "Speed" background element */}
           <div className="absolute inset-0 opacity-20 pointer-events-none">
@@ -55,23 +55,23 @@ export default async function Home() {
         </section>
         <section
           id="last-race-results"
-          className="h-[90vh] w-full flex items-center justify-center py-16"
+          className="h-auto min-h-[75vh] w-full flex items-center justify-center py-16"
         >
           <Results drivers={drivers} />
         </section>
         <section
           id="drivers-standings"
-          className="h-[90vh] w-full flex flex-col gap-4 items-center justify-center py-16"
+          className="h-screen w-full flex flex-col gap-4 items-center justify-center py-16"
         >
           <Standings drivers={drivers} />
         </section>
-        <section id="upcoming-session" className="h-[50vh] w-full">
+        <section id="upcoming-session" className="h-auto w-full">
           <UpcomingSession sessions={currentYearSessions} />
         </section>
-        <section
+        {/*<section
           id="constructors-standings"
           className="h-[50vh] w-full flex items-center justify-center"
-        ></section>
+        ></section>*/}
       </main>
     </div>
   );

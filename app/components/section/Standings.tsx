@@ -25,7 +25,7 @@ export default async function Standings({ drivers }: { drivers: Driver[] }) {
 
   return (
     <>
-      <h2 className="text-4xl md:text-5xl font-black italic uppercase text-white tracking-tighter underline underline-offset-8">
+      <h2 className="text-4xl md:text-5xl font-black italic uppercase text-white tracking-tighter underline underline-offset-8 mb-12">
         Drivers <span className="text-zinc-700">Standings</span>
       </h2>
       <div className="w-full max-w-5xl mx-auto px-4 py-8 h-full overflow-y-auto">
@@ -57,6 +57,7 @@ export default async function Standings({ drivers }: { drivers: Driver[] }) {
                       src={driver.headshot_url}
                       alt={driver.full_name}
                       fill
+                      sizes="(max-width: 768px) 14vw, 140px"
                       className="object-cover object-top scale-110"
                     />
                   </div>

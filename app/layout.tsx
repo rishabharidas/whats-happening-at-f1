@@ -34,8 +34,8 @@ export default function RootLayout({
         <div className="mt-16 px-0 md:px-16 w-full">
           {children}
         </div>
+        <Footer/>
       </body>
-      <Footer/>
     </html>
   );
 }
