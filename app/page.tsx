@@ -1,24 +1,15 @@
-// import Image from "next/image";
-
+import { Suspense } from "react";
 import Link from "next/link";
-import dynamic from "next/dynamic";
-import api from "@/utils/api";
+import UpcomingSession from "./components/section/UpcomingSession";
+import Standings from "./components/section/Standings";
+import Results from "./components/section/Results";
+import {
+  UpcomingSessionSkeleton,
+  ResultsSkeleton,
+  StandingsSkeleton,
+} from "./components/section/Skeletons";
 
-const UpcomingSession = dynamic(
-  () => import("./components/section/UpcomingSession"),
-);
-const Standings = dynamic(() => import("./components/section/Standings"));
-const Results = dynamic(() => import("./components/section/Results"));
-
-export default async function Home() {
-  const { get } = api();
-  const currentYear = new Date().getFullYear();
-
-  const res = await get(`sessions?is_cancelled=false&year=${currentYear}`);
-  const currentYearSessions = await res.json();
-
-  const driversResposne = await get("drivers");
-  const drivers = await driversResposne.json();
+export default function Home() {
 
   return (
     <div className="flex items-center justify-center font-sans w-full">
@@ -54,19 +45,25 @@ export default async function Home() {
           </div>
         </section>
         <section id="upcoming-session" className="h-auto w-full">
-          <UpcomingSession sessions={currentYearSessions} />
+          <Suspense fallback={<UpcomingSessionSkeleton />}>
+            <UpcomingSession />
+          </Suspense>
         </section>
         <section
           id="last-race-results"
           className="h-auto min-h-[75vh] w-full flex items-center justify-center py-16"
         >
-          <Results drivers={drivers} />
+          <Suspense fallback={<ResultsSkeleton />}>
+            <Results />
+          </Suspense>
         </section>
         <section
           id="drivers-standings"
           className="h-auto min-h-[85vh] w-full flex flex-col gap-4 items-center justify-center py-16"
         >
-          <Standings drivers={drivers} />
+          <Suspense fallback={<StandingsSkeleton />}>
+            <Standings />
+          </Suspense>
         </section>
         {/*<section
           id="constructors-standings"

@@ -2,7 +2,7 @@ import api from "@/utils/api";
 import { Driver } from "@/types/drivers";
 import Image from "next/image";
 
-export default async function Results({ drivers }: { drivers: Driver[] }) {
+export default async function Results() {
   const { get } = api();
   const today = new Date().toISOString().split(".")[0];
 
@@ -11,26 +11,41 @@ export default async function Results({ drivers }: { drivers: Driver[] }) {
   );
   const completed_session = await completed_sessions_response.json();
 
+  if (!Array.isArray(completed_session) || completed_session.length === 0) {
+    return null;
+  }
+
   const lastSession = completed_session[completed_session.length - 1];
   const session_key = lastSession?.session_key;
   const sessionName = lastSession?.circuit_short_name;
 
-  const results_response = await get(
-    `session_result?session_key=${session_key}&position<=3`,
-  );
-  const results = await results_response.json();
+  if (!session_key) {
+    return null;
+  }
 
-  const resultData = results.map((result: { driver_number: number; session_key: string }) => ({
+  const [results_response, driversResponse] = await Promise.all([
+    get(`session_result?session_key=${session_key}&position<=3`),
+    get(`drivers?session_key=${session_key}`)
+  ]);
+
+  const [results, drivers] = await Promise.all([
+    results_response.json(),
+    driversResponse.json()
+  ]);
+
+  if (!Array.isArray(results) || results.length === 0) {
+    return null;
+  }
+
+  const resultData = results.map((result: any) => ({
     ...result,
-    ...drivers.find(
-      (driver) =>
-        driver.driver_number === result.driver_number &&
-        driver.session_key === session_key,
-    ),
+    ...(Array.isArray(drivers) ? drivers.find(
+      (driver: any) => driver.driver_number === result.driver_number
+    ) : {}),
   }));
 
   // Helper for the podium order: P2, P1, P3
-  const podiumOrder = [resultData[1], resultData[0], resultData[2]];
+  const podiumOrder = [resultData[1], resultData[0], resultData[2]].filter(Boolean);
 
   return (
     <div className="py-16 px-4 flex flex-col items-center justify-center bg-[#0a0a0a] overflow-hidden w-full">
@@ -65,13 +80,19 @@ export default async function Results({ drivers }: { drivers: Driver[] }) {
                 {isWinner && (
                   <div className="absolute inset-0 bg-white/20 blur-[60px] rounded-full animate-pulse" />
                 )}
-                <Image
-                  src={driver?.headshot_url}
-                  alt={driver?.full_name}
-                  width={200}
-                  height={200}
-                  className="object-contain drop-shadow-2xl"
-                />
+                {driver?.headshot_url ? (
+                  <Image
+                    src={driver.headshot_url}
+                    alt={driver.full_name || "Driver"}
+                    width={200}
+                    height={200}
+                    className="object-contain drop-shadow-2xl"
+                  />
+                ) : (
+                  <div className="w-24 h-24 md:w-32 md:h-32 bg-zinc-800 flex items-center justify-center text-sm text-zinc-500 font-bold uppercase tracking-tight rounded-full mx-auto">
+                    F1
+                  </div>
+                )}
               </div>
 
               {/* Podium Pedestal */}

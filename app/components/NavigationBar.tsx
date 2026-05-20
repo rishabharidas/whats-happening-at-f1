@@ -203,8 +203,8 @@ export default function NavigationBar() {
         ${!isScrolled
           ? "w-4/5 max-w-5xl h-14 rounded-full bg-zinc-950/90 backdrop-blur-md border border-zinc-800 text-white justify-between px-6 shadow-xl -translate-x-1/2"
           : isMenuOpen
-            ? "w-[85vw] sm:w-[480px] md:w-[580px] h-14 rounded-full bg-zinc-950/90 backdrop-blur-md border border-zinc-800 text-white justify-between px-6 shadow-2xl"
-            : "w-14 h-14 rounded-full bg-red-600 border border-red-500 shadow-xl shadow-red-600/30 cursor-grab active:cursor-grabbing justify-center"
+            ? "w-[85vw] sm:w-[480px] md:w-[580px] h-14 rounded-full bg-zinc-950/90 backdrop-blur-md border border-gray-300 text-white justify-between px-6 shadow-2xl"
+            : "w-14 h-14 rounded-full bg-red-600 border border-gray-300 shadow-xl shadow-red-600/30 cursor-grab active:cursor-grabbing justify-center"
         }
       `}
     >

@@ -1,12 +1,27 @@
 import { SessionDetails } from "@/types/session";
 import api from "@/utils/api";
 
-export default async function UpcomingSession({
-  sessions,
-}: {
-  sessions: SessionDetails[];
-}) {
+export default async function UpcomingSession() {
+  const { get } = api();
+  const currentYear = new Date().getFullYear();
+  let sessions: SessionDetails[] = [];
+
+  try {
+    const res = await get(`sessions?is_cancelled=false&year=${currentYear}`);
+    if (res.ok) {
+      sessions = await res.json();
+    }
+  } catch (error: any) {
+    if (typeof process !== "undefined" && process.stdout) {
+      process.stdout.write("Error fetching sessions in UpcomingSession: " + (error?.message || error) + "\n");
+    }
+  }
+
   const today = new Date().toISOString().split(".")[0];
+
+  if (!Array.isArray(sessions)) {
+    return null;
+  }
 
   const upcomingSessions = sessions.filter(
     (session: SessionDetails) => session.date_start > today,
@@ -23,8 +38,6 @@ export default async function UpcomingSession({
   let meetingData: any = null;
   const year = mainSession.date_start ? new Date(mainSession.date_start).getFullYear() : new Date().getFullYear();
   const countryName = mainSession.country_name;
-
-  const { get } = api();
 
   try {
     // Primary: fetch by year and country
@@ -57,8 +70,10 @@ export default async function UpcomingSession({
         }
       }
     }
-  } catch (error) {
-    console.error("Error fetching circuit preview from OpenF1 API:", error);
+  } catch (error: any) {
+    if (typeof process !== "undefined" && process.stderr) {
+      process.stderr.write("Error fetching circuit preview from OpenF1 API: " + (error?.message || error) + "\n");
+    }
   }
 
   const formatSessionDate = (dateStr: string) => {

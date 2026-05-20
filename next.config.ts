@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'www.formula1.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };
