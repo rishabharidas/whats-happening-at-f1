@@ -1,4 +1,5 @@
 import { SessionDetails } from "@/types/session";
+import api from "@/utils/api";
 
 export default async function UpcomingSession({
   sessions,
@@ -17,6 +18,48 @@ export default async function UpcomingSession({
   const secondarySessions = upcomingSessions.slice(1, 4);
 
   if (!mainSession) return null;
+
+  // Fetch dynamic meeting/circuit preview data from OpenF1 API
+  let meetingData: any = null;
+  const year = mainSession.date_start ? new Date(mainSession.date_start).getFullYear() : new Date().getFullYear();
+  const countryName = mainSession.country_name;
+
+  const { get } = api();
+
+  try {
+    // Primary: fetch by year and country
+    const res = await get(
+      `meetings?year=${year}&country_name=${encodeURIComponent(countryName)}`
+    );
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        meetingData = data[0];
+      }
+    }
+
+    // Secondary: fallback to search in all meetings of the year in case of country name mismatch
+    if (!meetingData) {
+      const fallbackRes = await get(`meetings?year=${year}`);
+      if (fallbackRes.ok) {
+        const allMeetings = await fallbackRes.json();
+        if (Array.isArray(allMeetings)) {
+          const normalizedCountry = countryName.toLowerCase();
+          const normalizedCircuit = mainSession.circuit_short_name.toLowerCase();
+          const match = allMeetings.find(
+            (m: any) =>
+              (m.country_name && (m.country_name.toLowerCase().includes(normalizedCountry) || normalizedCountry.includes(m.country_name.toLowerCase()))) ||
+              (m.circuit_short_name && (m.circuit_short_name.toLowerCase().includes(normalizedCircuit) || normalizedCircuit.includes(m.circuit_short_name.toLowerCase())))
+          );
+          if (match) {
+            meetingData = match;
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching circuit preview from OpenF1 API:", error);
+  }
 
   const formatSessionDate = (dateStr: string) => {
     const d = new Date(dateStr);
@@ -79,6 +122,42 @@ export default async function UpcomingSession({
             </p>
           </div>
         </div>
+
+        {meetingData && (
+          <div className="relative overflow-hidden md:w-80 border-t md:border-t-0 md:border-l border-zinc-800 bg-zinc-950/40 p-6 flex flex-col justify-between group/circuit min-h-[220px]">
+            {/* Ambient background glow */}
+            <div className="absolute inset-0 bg-gradient-to-br from-red-600/5 to-transparent pointer-events-none" />
+
+            {/* Circuit Image (Centered and full display) */}
+            {meetingData.circuit_image ? (
+              <div className="flex-1 flex items-center justify-center relative py-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={meetingData.circuit_image}
+                  alt={meetingData.circuit_short_name || "Circuit Layout"}
+                  className="max-w-full max-h-36 object-contain filter invert opacity-60 group-hover/circuit:opacity-100 group-hover/circuit:scale-105 transition-all duration-500 pointer-events-none brightness-200"
+                />
+              </div>
+            ) : (
+              <div className="flex-1" />
+            )}
+
+            {/* Bottom Row: Country & Flag */}
+            <div className="relative z-10 flex items-center gap-2 border-t border-zinc-800/80 pt-3 mt-auto">
+              {meetingData.country_flag && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={meetingData.country_flag}
+                  alt={meetingData.country_name}
+                  className="w-6 h-auto rounded-sm border border-zinc-800 shadow-sm"
+                />
+              )}
+              <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
+                {meetingData.country_name}
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* SECONDARY SESSIONS (Mini Row) */}

@@ -53,6 +53,9 @@ export default async function Home() {
             </Link>
           </div>
         </section>
+        <section id="upcoming-session" className="h-auto w-full">
+          <UpcomingSession sessions={currentYearSessions} />
+        </section>
         <section
           id="last-race-results"
           className="h-auto min-h-[75vh] w-full flex items-center justify-center py-16"
@@ -61,12 +64,9 @@ export default async function Home() {
         </section>
         <section
           id="drivers-standings"
-          className="h-screen w-full flex flex-col gap-4 items-center justify-center py-16"
+          className="h-auto min-h-[85vh] w-full flex flex-col gap-4 items-center justify-center py-16"
         >
           <Standings drivers={drivers} />
-        </section>
-        <section id="upcoming-session" className="h-auto w-full">
-          <UpcomingSession sessions={currentYearSessions} />
         </section>
         {/*<section
           id="constructors-standings"
