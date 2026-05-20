@@ -5,16 +5,12 @@ import StandingsClient from "./StandingsClient";
 export default async function Standings() {
   const { get } = api();
 
-  // Fetch both drivers and constructors standings concurrently
-  const [driversRes, teamsRes] = await Promise.all([
-    get("/championship_drivers?session_key=latest"),
-    get("/championship_teams?session_key=latest"),
-  ]);
+  // Fetch both drivers and constructors standings sequentially to avoid F1 API rate limits
+  const driversRes = await get("/championship_drivers?session_key=latest");
+  const teamsRes = await get("/championship_teams?session_key=latest");
 
-  const [driversStandingsData, teamsStandingsData] = await Promise.all([
-    driversRes.json(),
-    teamsRes.json(),
-  ]);
+  const driversStandingsData = await driversRes.json();
+  const teamsStandingsData = await teamsRes.json();
 
   // Extract session key from standings data to query drivers for this session
   const session_key = Array.isArray(driversStandingsData) && driversStandingsData.length > 0
@@ -40,6 +36,7 @@ export default async function Standings() {
       ...driversMap[driver.driver_number],
     })
   ) : [];
+
 
   // Map constructor colors dynamically based on drivers team mapping
   const teamColoursMap = Array.isArray(drivers) ? drivers.reduce(

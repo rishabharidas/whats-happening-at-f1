@@ -23,15 +23,11 @@ export default async function Results() {
     return null;
   }
 
-  const [results_response, driversResponse] = await Promise.all([
-    get(`/session_result?session_key=${session_key}&position<=3`),
-    get(`/drivers?session_key=${session_key}`)
-  ]);
+  const results_response = await get(`/session_result?session_key=${session_key}&position<=3`);
+  const driversResponse = await get(`/drivers?session_key=${session_key}`);
 
-  const [results, drivers] = await Promise.all([
-    results_response.json(),
-    driversResponse.json()
-  ]);
+  const results = await results_response.json();
+  const drivers = await driversResponse.json();
 
   if (!Array.isArray(results) || results.length === 0) {
     return null;
