@@ -7,7 +7,7 @@ export default async function UpcomingSession() {
   let sessions: SessionDetails[] = [];
 
   try {
-    const res = await get(`sessions?is_cancelled=false&year=${currentYear}`);
+    const res = await get(`/sessions?is_cancelled=false&year=${currentYear}`);
     if (res.ok) {
       sessions = await res.json();
     }

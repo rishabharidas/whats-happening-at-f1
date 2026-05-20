@@ -7,8 +7,8 @@ export default async function Standings() {
 
   // Fetch both drivers and constructors standings concurrently
   const [driversRes, teamsRes] = await Promise.all([
-    get("championship_drivers?session_key=latest"),
-    get("championship_teams?session_key=latest"),
+    get("/championship_drivers?session_key=latest"),
+    get("/championship_teams?session_key=latest"),
   ]);
 
   const [driversStandingsData, teamsStandingsData] = await Promise.all([

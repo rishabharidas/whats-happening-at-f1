@@ -24,8 +24,8 @@ export default async function Results() {
   }
 
   const [results_response, driversResponse] = await Promise.all([
-    get(`session_result?session_key=${session_key}&position<=3`),
-    get(`drivers?session_key=${session_key}`)
+    get(`/session_result?session_key=${session_key}&position<=3`),
+    get(`/drivers?session_key=${session_key}`)
   ]);
 
   const [results, drivers] = await Promise.all([

@@ -34,14 +34,25 @@ export default function Home() {
               F1 News • Standings • Race Analysis
             </p>
 
-            <Link
-              href="#last-race-results"
-              className="group mt-10 relative px-8 py-4 bg-white text-black font-bold uppercase italic tracking-tighter transition-all hover:bg-red-600 hover:text-white"
-            >
-              <span className="relative z-10">Get Started</span>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
+              <Link
+                href="/explore"
+                className="group relative w-full sm:w-auto px-8 py-4 bg-white text-black font-bold uppercase italic tracking-tighter transition-all hover:bg-red-600 hover:text-white text-center"
+              >
+                <span className="relative z-10">Get Started</span>
+                {/* Small corner accent */}
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-red-600 group-hover:bg-white transition-colors" />
+              </Link>
+
               {/* Small corner accent */}
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-red-600 group-hover:bg-white transition-colors" />
-            </Link>
+              {/* <Link
+                href="/explore"
+                className="group relative w-full sm:w-auto px-8 py-4 bg-zinc-950/80 border border-zinc-800 text-white font-bold uppercase italic tracking-tighter transition-all hover:bg-red-600 hover:border-red-600 text-center"
+              >
+                <span className="relative z-10">Explore Paddock</span>
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-red-600 group-hover:bg-white transition-colors" />
+              </Link> */}
+            </div>
           </div>
         </section>
         <section id="upcoming-session" className="h-auto w-full">
