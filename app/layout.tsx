@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import NavigationBar from "@/components/NavigationBar";
+import dynamic from "next/dynamic";
 import Footer from "@/components/Footer";
+
+const NavigationBar = dynamic(() => import("@/components/NavigationBar"));
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,7 +36,7 @@ export default function RootLayout({
         <div className="mt-16 px-0 md:px-16 w-full">
           {children}
         </div>
-        <Footer/>
+        <Footer />
       </body>
     </html>
   );
