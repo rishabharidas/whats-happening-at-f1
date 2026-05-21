@@ -7,7 +7,7 @@ export default async function Results() {
   const today = new Date().toISOString().split(".")[0];
 
   const completed_sessions_response = await get(
-    `sessions?is_cancelled=false&session_type=Race&date_end<${today}`,
+    `/sessions?is_cancelled=false&session_type=Race&date_end<${today}`,
   );
   const completed_session = await completed_sessions_response.json();
 

@@ -17,7 +17,7 @@ export default async function Standings() {
     ? driversStandingsData[0].session_key
     : "latest";
 
-  const driversResponse = await get(`drivers?session_key=${session_key}`);
+  const driversResponse = await get(`/drivers?session_key=${session_key}`);
   const drivers = await driversResponse.json();
 
   // Create a map of driver details by their driver number
