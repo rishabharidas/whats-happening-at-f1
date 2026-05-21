@@ -9,6 +9,7 @@ export default async function Results() {
   const completed_sessions_response = await get(
     `/sessions?is_cancelled=false&session_type=Race&date_end<${today}`,
   );
+
   const completed_session = await completed_sessions_response.json();
 
   if (!Array.isArray(completed_session) || completed_session.length === 0) {
@@ -23,8 +24,11 @@ export default async function Results() {
     return null;
   }
 
-  const results_response = await get(`/session_result?session_key=${session_key}&position<=3`);
-  const driversResponse = await get(`/drivers?session_key=${session_key}`);
+  // Fire both requests together so they line up cleanly in our brand new queue
+  const [results_response, driversResponse] = await Promise.all([
+    get(`/session_result?session_key=${session_key}&position<=3`),
+    get(`/drivers?session_key=${session_key}`),
+  ]);
 
   const results = await results_response.json();
   const drivers = await driversResponse.json();
@@ -35,13 +39,16 @@ export default async function Results() {
 
   const resultData = results.map((result: any) => ({
     ...result,
-    ...(Array.isArray(drivers) ? drivers.find(
-      (driver: any) => driver.driver_number === result.driver_number
-    ) : {}),
+    ...(Array.isArray(drivers)
+      ? drivers.find(
+          (driver: any) => driver.driver_number === result.driver_number,
+        )
+      : {}),
   }));
 
-  // Helper for the podium order: P2, P1, P3
-  const podiumOrder = [resultData[1], resultData[0], resultData[2]].filter(Boolean);
+  const podiumOrder = [resultData[1], resultData[0], resultData[2]].filter(
+    Boolean,
+  );
 
   return (
     <div className="py-16 px-4 flex flex-col items-center justify-center bg-[#0a0a0a] overflow-hidden w-full">
@@ -69,7 +76,6 @@ export default async function Results() {
               key={index}
               className="relative flex flex-col items-center flex-1 max-w-50"
             >
-              {/* Driver Image with "Pop-out" effect */}
               <div
                 className={`relative z-10 transition-transform duration-500 hover:scale-105 ${isWinner ? "w-32 md:w-44" : "w-24 md:w-32"}`}
               >
@@ -91,7 +97,6 @@ export default async function Results() {
                 )}
               </div>
 
-              {/* Podium Pedestal */}
               <div
                 className={`relative w-full ${heightClass} flex flex-col items-center justify-start pt-4 rounded-t-xl overflow-hidden`}
                 style={{
@@ -99,7 +104,6 @@ export default async function Results() {
                   borderTop: `4px solid ${bgColor}`,
                 }}
               >
-                {/* Big Background Number */}
                 <span className="absolute top-2 text-6xl md:text-8xl font-black text-white/10 italic select-none">
                   {driver?.position}
                 </span>
