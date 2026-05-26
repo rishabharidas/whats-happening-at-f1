@@ -13,7 +13,11 @@ export default async function UpcomingSession() {
     }
   } catch (error: any) {
     if (typeof process !== "undefined" && process.stdout) {
-      process.stdout.write("Error fetching sessions in UpcomingSession: " + (error?.message || error) + "\n");
+      process.stdout.write(
+        "Error fetching sessions in UpcomingSession: " +
+          (error?.message || error) +
+          "\n",
+      );
     }
   }
 
@@ -36,13 +40,15 @@ export default async function UpcomingSession() {
 
   // Fetch dynamic meeting/circuit preview data from OpenF1 API
   let meetingData: any = null;
-  const year = mainSession.date_start ? new Date(mainSession.date_start).getFullYear() : new Date().getFullYear();
+  const year = mainSession.date_start
+    ? new Date(mainSession.date_start).getFullYear()
+    : new Date().getFullYear();
   const countryName = mainSession.country_name;
 
   try {
     // Primary: fetch by year and country
     const res = await get(
-      `meetings?year=${year}&country_name=${encodeURIComponent(countryName)}`
+      `meetings?year=${year}&country_name=${encodeURIComponent(countryName)}`,
     );
     if (res.ok) {
       const data = await res.json();
@@ -58,11 +64,20 @@ export default async function UpcomingSession() {
         const allMeetings = await fallbackRes.json();
         if (Array.isArray(allMeetings)) {
           const normalizedCountry = countryName.toLowerCase();
-          const normalizedCircuit = mainSession.circuit_short_name.toLowerCase();
+          const normalizedCircuit =
+            mainSession.circuit_short_name.toLowerCase();
           const match = allMeetings.find(
             (m: any) =>
-              (m.country_name && (m.country_name.toLowerCase().includes(normalizedCountry) || normalizedCountry.includes(m.country_name.toLowerCase()))) ||
-              (m.circuit_short_name && (m.circuit_short_name.toLowerCase().includes(normalizedCircuit) || normalizedCircuit.includes(m.circuit_short_name.toLowerCase())))
+              (m.country_name &&
+                (m.country_name.toLowerCase().includes(normalizedCountry) ||
+                  normalizedCountry.includes(m.country_name.toLowerCase()))) ||
+              (m.circuit_short_name &&
+                (m.circuit_short_name
+                  .toLowerCase()
+                  .includes(normalizedCircuit) ||
+                  normalizedCircuit.includes(
+                    m.circuit_short_name.toLowerCase(),
+                  ))),
           );
           if (match) {
             meetingData = match;
@@ -72,7 +87,11 @@ export default async function UpcomingSession() {
     }
   } catch (error: any) {
     if (typeof process !== "undefined" && process.stderr) {
-      process.stderr.write("Error fetching circuit preview from OpenF1 API: " + (error?.message || error) + "\n");
+      process.stderr.write(
+        "Error fetching circuit preview from OpenF1 API: " +
+          (error?.message || error) +
+          "\n",
+      );
     }
   }
 

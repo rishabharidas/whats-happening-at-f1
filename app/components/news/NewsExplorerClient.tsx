@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 
 interface Article {
@@ -50,8 +50,12 @@ export default function NewsExplorerClient({
         activeSource === "All" || article.source?.name === activeSource;
       const matchesSearch =
         article.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        article.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        article.source?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        article.description
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        article.source?.name
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
         article.author?.toLowerCase().includes(searchQuery.toLowerCase());
 
       return matchesSource && matchesSearch;
@@ -167,14 +171,14 @@ export default function NewsExplorerClient({
                   <span className="text-[10px] text-zinc-500 font-mono truncate max-w-[150px]">
                     By {article.author || "Paddock Press"}
                   </span>
-                  <a
+                  <Link
                     href={article.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-xs font-bold text-red-500 uppercase tracking-widest hover:text-white transition-colors"
                   >
                     Read Story &rarr;
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>

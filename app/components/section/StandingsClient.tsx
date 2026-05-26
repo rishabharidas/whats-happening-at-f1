@@ -27,7 +27,9 @@ export default function StandingsClient({
   driversStandings: DriverStanding[];
   constructorsStandings: TeamStanding[];
 }) {
-  const [activeTab, setActiveTab] = useState<"drivers" | "constructors">("drivers");
+  const [activeTab, setActiveTab] = useState<"drivers" | "constructors">(
+    "drivers",
+  );
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,11 +40,11 @@ export default function StandingsClient({
   const filteredDrivers = driversStandings.filter(
     (driver) =>
       driver.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      driver.team_name?.toLowerCase().includes(searchQuery.toLowerCase())
+      driver.team_name?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const filteredConstructors = constructorsStandings.filter((team) =>
-    team.team_name?.toLowerCase().includes(searchQuery.toLowerCase())
+    team.team_name?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (

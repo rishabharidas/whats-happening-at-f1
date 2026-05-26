@@ -1,7 +1,10 @@
 import React, { Suspense } from "react";
 import Link from "next/link";
 import newsApi from "@/utils/newsApi";
-import { FeaturedNewsSkeleton, NewsGridSkeleton } from "@/components/news/NewsSkeletons";
+import {
+  FeaturedNewsSkeleton,
+  NewsGridSkeleton,
+} from "@/components/news/NewsSkeletons";
 
 // Force dynamic so it always evaluates freshly in development
 export const dynamic = "force-dynamic";
@@ -13,36 +16,36 @@ const PADDOCK_FAST_FACTS = [
     title: "World Championships",
     holder: "Lewis Hamilton & Michael Schumacher",
     desc: "The absolute record for the most driver championship titles in Formula 1 history.",
-    color: "from-red-600 to-orange-500"
+    color: "from-red-600 to-orange-500",
   },
   {
     number: "105",
     title: "Grand Prix Wins",
     holder: "Lewis Hamilton",
     desc: "The record holder for the highest number of individual race victories.",
-    color: "from-blue-600 to-indigo-500"
+    color: "from-blue-600 to-indigo-500",
   },
   {
     number: "18y",
     title: "Youngest Race Winner",
     holder: "Max Verstappen (GP Spain 2016)",
     desc: "Stunned the motorsport world by winning on his Red Bull debut at just 18 years, 228 days.",
-    color: "from-yellow-500 to-amber-600"
+    color: "from-yellow-500 to-amber-600",
   },
   {
     number: "1:18.8",
     title: "Fastest Ever Lap (Monza)",
     holder: "Lewis Hamilton (2020)",
     desc: "Recorded at an average speed of 264.362 km/h (164.267 mph) during qualifying.",
-    color: "from-emerald-500 to-teal-600"
-  }
+    color: "from-emerald-500 to-teal-600",
+  },
 ];
 
 // Inner Server Component that fetches the news
 async function ExploreNewsGrid() {
   const { getF1News } = newsApi();
   let articles: any[] = [];
-  
+
   try {
     const res = await getF1News(4);
     if (res.ok) {
@@ -53,7 +56,11 @@ async function ExploreNewsGrid() {
     }
   } catch (error: any) {
     if (typeof process !== "undefined" && process.stdout) {
-      process.stdout.write("Error fetching news in ExploreNewsGrid: " + (error?.message || error) + "\n");
+      process.stdout.write(
+        "Error fetching news in ExploreNewsGrid: " +
+          (error?.message || error) +
+          "\n",
+      );
     }
   }
 
@@ -72,7 +79,11 @@ async function ExploreNewsGrid() {
   const formatDate = (dateStr: string) => {
     try {
       const d = new Date(dateStr);
-      return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+      return d.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
     } catch {
       return "Paddock Insider";
     }
@@ -87,7 +98,10 @@ async function ExploreNewsGrid() {
           <div className="lg:w-[55%] min-h-[250px] lg:min-h-[400px] bg-zinc-950 relative overflow-hidden flex-shrink-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={featured.urlToImage || "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&q=80&w=800"}
+              src={
+                featured.urlToImage ||
+                "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&q=80&w=800"
+              }
               alt={featured.title}
               className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
             />
@@ -146,7 +160,10 @@ async function ExploreNewsGrid() {
               <div className="h-44 w-full bg-zinc-950 relative overflow-hidden flex-shrink-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={article.urlToImage || "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&q=80&w=800"}
+                  src={
+                    article.urlToImage ||
+                    "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&q=80&w=800"
+                  }
                   alt={article.title}
                   className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
                 />
@@ -215,12 +232,14 @@ export default function Explore() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start w-full">
           {/* NEWS STREAM FEED (LEFT COLUMN) */}
           <div className="lg:col-span-3 flex flex-col gap-8 items-center w-full">
-            <Suspense fallback={
-              <div className="w-full flex flex-col gap-8">
-                <FeaturedNewsSkeleton />
-                <NewsGridSkeleton count={3} />
-              </div>
-            }>
+            <Suspense
+              fallback={
+                <div className="w-full flex flex-col gap-8">
+                  <FeaturedNewsSkeleton />
+                  <NewsGridSkeleton count={3} />
+                </div>
+              }
+            >
               <ExploreNewsGrid />
             </Suspense>
 

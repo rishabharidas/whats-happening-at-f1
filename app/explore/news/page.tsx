@@ -22,7 +22,9 @@ async function exploreNewsLoader() {
     }
   } catch (error: any) {
     if (typeof process !== "undefined" && process.stdout) {
-      process.stdout.write("Error fetching full news feed: " + (error?.message || error) + "\n");
+      process.stdout.write(
+        "Error fetching full news feed: " + (error?.message || error) + "\n",
+      );
     }
   }
 

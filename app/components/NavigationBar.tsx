@@ -104,7 +104,10 @@ export default function NavigationBar() {
     const minX = 44 - width / 2;
     const maxX = width / 2 - 44;
     const clampedX = Math.max(minX, Math.min(maxX, nextX));
-    const clampedY = Math.max(16 - initialY, Math.min(window.innerHeight - initialY - 72, nextY));
+    const clampedY = Math.max(
+      16 - initialY,
+      Math.min(window.innerHeight - initialY - 72, nextY),
+    );
 
     dragOffsetRef.current = { x: clampedX, y: clampedY };
 
@@ -137,7 +140,10 @@ export default function NavigationBar() {
   };
 
   // Smooth scroll handler for anchor links
-  const handleAnchorClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  const handleAnchorClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string,
+  ) => {
     if (href.startsWith("#")) {
       e.preventDefault();
       setIsMenuOpen(false);
@@ -174,7 +180,10 @@ export default function NavigationBar() {
       const maxX = halfRemaining - 16;
 
       const clampedX = Math.max(minX, Math.min(maxX, dragOffset.x));
-      const clampedY = Math.max(16 - initialY, Math.min(window.innerHeight - initialY - 72, dragOffset.y));
+      const clampedY = Math.max(
+        16 - initialY,
+        Math.min(window.innerHeight - initialY - 72, dragOffset.y),
+      );
 
       return `translateX(-50%) translate(${clampedX}px, ${clampedY}px)`;
     }
@@ -183,7 +192,10 @@ export default function NavigationBar() {
     const minX = 44 - width / 2;
     const maxX = width / 2 - 44;
     const clampedX = Math.max(minX, Math.min(maxX, dragOffset.x));
-    const clampedY = Math.max(16 - initialY, Math.min(window.innerHeight - initialY - 72, dragOffset.y));
+    const clampedY = Math.max(
+      16 - initialY,
+      Math.min(window.innerHeight - initialY - 72, dragOffset.y),
+    );
 
     return `translateX(-50%) translate(${clampedX}px, ${clampedY}px)`;
   };
@@ -200,43 +212,75 @@ export default function NavigationBar() {
       style={transformStyle ? { transform: transformStyle } : undefined}
       className={`fixed z-[999] top-6 md:top-8 left-1/2 flex items-center touch-none select-none
         ${isDragging ? "transition-none" : "transition-[width,height,background-color,border-color,box-shadow,transform,opacity] duration-300 ease-in-out"}
-        ${!isScrolled
-          ? "w-4/5 max-w-5xl h-14 rounded-full bg-zinc-950/90 backdrop-blur-md border border-zinc-800 text-white justify-between px-6 shadow-xl -translate-x-1/2"
-          : isMenuOpen
-            ? "w-[85vw] sm:w-[480px] md:w-[580px] h-14 rounded-full bg-zinc-950/90 backdrop-blur-md border border-gray-300 text-white justify-between px-6 shadow-2xl"
-            : "w-14 h-14 rounded-full bg-red-600 border border-gray-300 shadow-xl shadow-red-600/30 cursor-grab active:cursor-grabbing justify-center"
+        ${
+          !isScrolled
+            ? "w-4/5 max-w-5xl h-14 rounded-full bg-zinc-950/90 backdrop-blur-md border border-zinc-800 text-white justify-between px-6 shadow-xl -translate-x-1/2"
+            : isMenuOpen
+              ? "w-[85vw] sm:w-[480px] md:w-[580px] h-14 rounded-full bg-zinc-950/90 backdrop-blur-md border border-gray-300 text-white justify-between px-6 shadow-2xl"
+              : "w-14 h-14 rounded-full bg-red-600 border border-gray-300 shadow-xl shadow-red-600/30 cursor-grab active:cursor-grabbing justify-center"
         }
       `}
     >
       {/* Logo: Visible in Wide and Dock states */}
-      <div className={`transition-[opacity,transform] duration-300 flex items-center ${(isScrolled && !isMenuOpen)
-        ? "opacity-0 scale-75 pointer-events-none absolute"
-        : "opacity-100 scale-100"
-        }`}>
-        <Link href="/" className="uppercase font-extrabold italic font-mono text-white hover:text-red-500 transition-colors">
+      <div
+        className={`transition-[opacity,transform] duration-300 flex items-center ${
+          isScrolled && !isMenuOpen
+            ? "opacity-0 scale-75 pointer-events-none absolute"
+            : "opacity-100 scale-100"
+        }`}
+      >
+        <Link
+          href="/"
+          className="uppercase font-extrabold italic font-mono text-white hover:text-red-500 transition-colors"
+        >
           WH@F1
         </Link>
       </div>
 
       {/* Nav Links: Visible in Wide and Dock states */}
-      <div className={`flex items-center transition-[opacity,transform] duration-300 ${(isScrolled && !isMenuOpen)
-        ? "opacity-0 scale-75 pointer-events-none absolute"
-        : "opacity-100 scale-100"
-        } ${isScrolled && isMenuOpen
-          ? "gap-3 sm:gap-5 font-mono font-medium text-xs sm:text-sm text-zinc-300"
-          : "gap-3 font-mono font-light text-sm text-zinc-300"
-        }`}>
-        <a href="#last-race-results" onClick={(e) => handleAnchorClick(e, "#last-race-results")} className="hover:text-red-500 transition-colors">results</a>
-        <a href="#drivers-standings" onClick={(e) => handleAnchorClick(e, "#drivers-standings")} className="hover:text-red-500 transition-colors">drivers</a>
-        <a href="#upcoming-session" onClick={(e) => handleAnchorClick(e, "#upcoming-session")} className="hover:text-red-500 transition-colors">upcoming</a>
+      <div
+        className={`flex items-center transition-[opacity,transform] duration-300 ${
+          isScrolled && !isMenuOpen
+            ? "opacity-0 scale-75 pointer-events-none absolute"
+            : "opacity-100 scale-100"
+        } ${
+          isScrolled && isMenuOpen
+            ? "gap-3 sm:gap-5 font-mono font-medium text-xs sm:text-sm text-zinc-300"
+            : "gap-3 font-mono font-light text-sm text-zinc-300"
+        }`}
+      >
+        <a
+          href="#last-race-results"
+          onClick={(e) => handleAnchorClick(e, "#last-race-results")}
+          className="hover:text-red-500 transition-colors"
+        >
+          results
+        </a>
+        <a
+          href="#drivers-standings"
+          onClick={(e) => handleAnchorClick(e, "#drivers-standings")}
+          className="hover:text-red-500 transition-colors"
+        >
+          drivers
+        </a>
+        <a
+          href="#upcoming-session"
+          onClick={(e) => handleAnchorClick(e, "#upcoming-session")}
+          className="hover:text-red-500 transition-colors"
+        >
+          upcoming
+        </a>
         {/* <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-red-500 transition-colors hidden sm:inline-block">github</a> */}
       </div>
 
       {/* Bubble Icon (Hamburger): Visible ONLY in Bubble state */}
-      <div className={`transition-[opacity,transform] duration-300 ${(isScrolled && !isMenuOpen)
-        ? "opacity-100 scale-100 flex items-center justify-center"
-        : "opacity-0 scale-50 pointer-events-none absolute"
-        }`}>
+      <div
+        className={`transition-[opacity,transform] duration-300 ${
+          isScrolled && !isMenuOpen
+            ? "opacity-100 scale-100 flex items-center justify-center"
+            : "opacity-0 scale-50 pointer-events-none absolute"
+        }`}
+      >
         <svg
           className="w-6 h-6 text-white pointer-events-none"
           fill="none"
@@ -260,10 +304,11 @@ export default function NavigationBar() {
           setIsMenuOpen(false);
         }}
         onPointerDown={(e) => e.stopPropagation()} // Prevent drag triggering on button click
-        className={`transition-[opacity,transform,color] duration-300 hover:text-red-500 active:scale-95 cursor-pointer ${(isScrolled && isMenuOpen)
-          ? "opacity-100 scale-100 flex items-center justify-center"
-          : "opacity-0 scale-50 pointer-events-none absolute"
-          }`}
+        className={`transition-[opacity,transform,color] duration-300 hover:text-red-500 active:scale-95 cursor-pointer ${
+          isScrolled && isMenuOpen
+            ? "opacity-100 scale-100 flex items-center justify-center"
+            : "opacity-0 scale-50 pointer-events-none absolute"
+        }`}
         aria-label="Close dock"
       >
         <svg
@@ -284,4 +329,3 @@ export default function NavigationBar() {
     </nav>
   );
 }
-

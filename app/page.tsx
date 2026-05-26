@@ -10,7 +10,6 @@ import {
 } from "./components/section/Skeletons";
 
 export default function Home() {
-
   return (
     <div className="flex items-center justify-center font-sans w-full">
       <main className="w-full flex flex-col items-center space-y-5">
