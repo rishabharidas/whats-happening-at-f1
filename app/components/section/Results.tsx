@@ -1,51 +1,75 @@
 import api from "@/utils/api";
-import { Driver } from "@/types/drivers";
 import Image from "next/image";
+
+const TEAM_COLORS: Record<string, string> = {
+  "red bull": "3671C6",
+  "mercedes": "27F4D2",
+  "ferrari": "E80020",
+  "mclaren": "FF8000",
+  "aston martin": "229971",
+  "alpine f1 team": "0093cc",
+  "williams": "64C4FF",
+  "rb f1 team": "6692FF",
+  "kick sauber": "52E252",
+  "haas f1 team": "B6BABD",
+  "audi": "E00000",
+  "cadillac f1 team": "FFD700"
+};
 
 export default async function Results() {
   const { get } = api();
-  const today = new Date().toISOString().split(".")[0];
 
-  const completed_sessions_response = await get(
-    `/sessions?is_cancelled=false&session_type=Race&date_end<${today}`,
-  );
+  const results_response = await get("current/last/results.json");
+  const data = await results_response.json();
 
-  const completed_session = await completed_sessions_response.json();
-
-  if (!Array.isArray(completed_session) || completed_session.length === 0) {
+  const race = data?.MRData?.RaceTable?.Races?.[0];
+  if (!race) {
     return null;
   }
 
-  const lastSession = completed_session[completed_session.length - 1];
-  const session_key = lastSession?.session_key;
-  const sessionName = lastSession?.circuit_short_name;
+  const sessionName = race.raceName;
+  const results = race.Results || [];
 
-  if (!session_key) {
+  if (results.length === 0) {
     return null;
   }
 
-  // Fire both requests together so they line up cleanly in our brand new queue
-  const [results_response, driversResponse] = await Promise.all([
-    get(`/session_result?session_key=${session_key}&position<=3`),
-    get(`/drivers?session_key=${session_key}`),
-  ]);
-
-  const results = await results_response.json();
-  const drivers = await driversResponse.json();
-
-  if (!Array.isArray(results) || results.length === 0) {
-    return null;
+  // Get podium (top 3)
+  const podiumResults = results.slice(0, 3);
+  
+  // Fetch headshots from OpenF1 (fast static endpoint)
+  let driverImages: Record<number, string> = {};
+  try {
+    const openF1Res = await fetch("https://api.openf1.org/v1/drivers?session_key=latest");
+    const openF1Data = await openF1Res.json();
+    if (Array.isArray(openF1Data)) {
+      openF1Data.forEach((d: any) => {
+        driverImages[d.driver_number] = d.headshot_url;
+      });
+    }
+  } catch (e) {
+    console.error("Failed to fetch driver images from OpenF1", e);
   }
 
-  const resultData = results.map((result: any) => ({
-    ...result,
-    ...(Array.isArray(drivers)
-      ? drivers.find(
-          (driver: any) => driver.driver_number === result.driver_number,
-        )
-      : {}),
-  }));
+  const resultData = podiumResults.map((result: any) => {
+    const driver = result.Driver;
+    const constructor = result.Constructor;
+    const teamName = constructor?.name || "";
 
+    return {
+      position: parseInt(result.position),
+      name_acronym: driver.code,
+      full_name: `${driver.givenName} ${driver.familyName}`,
+      team_name: teamName,
+      team_colour: TEAM_COLORS[teamName.toLowerCase()] || "333333",
+      headshot_url: (driverImages[parseInt(result.number)] || "").replace(
+        "1col",
+        "4col"
+      ),
+    };
+  });
+
+  // Reorder for podium display: 2nd, 1st, 3rd
   const podiumOrder = [resultData[1], resultData[0], resultData[2]].filter(
     Boolean,
   );

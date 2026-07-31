@@ -2,9 +2,9 @@
 let requestQueue: Promise<unknown> = Promise.resolve();
 
 export default function api() {
-  const apiUrl = process.env.NEXT_OPENF1_API_URL;
+  const apiUrl = process.env.NEXT_F1_API_URL;
   if (!apiUrl) {
-    throw new Error("NEXT_OPENF1_API_URL is not defined");
+    throw new Error("NEXT_F1_API_URL is not defined");
   }
 
   const base = apiUrl.endsWith("/") ? apiUrl.slice(0, -1) : apiUrl;

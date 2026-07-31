@@ -19,7 +19,7 @@ A high-performance Formula 1 dashboard built with **Next.js**, featuring real-ti
 * **Framework:** [Next.js](https://nextjs.org/) (App Router)
 * **Styling:** [Tailwind CSS](https://tailwindcss.com/)
 * **Fonts:** Geist Sans & Geist Mono (Optimized via `next/font`)
-* **Data Source:** [OpenF1 API](https://openf1.org/)
+* **Data Source:** [Jolpica F1 API](https://api.jolpi.ca/) & [OpenF1 API](https://openf1.org/)
 
 
 ## 🚀 Getting Started
@@ -45,13 +45,13 @@ bun dev
 
 /components/UpcomingSession: The race weekend schedule and ticket-style countdown.
 
-/utils/api: Centralized API wrapper for the OpenF1 endpoints.
+/utils/api: Centralized API wrapper for fetching from the Jolpica endpoints (queued to prevent rate-limits).
 
 
 ## 🏁 Credits & Data
 
-Data Source
-`This project is powered by the OpenF1 API, an incredible open-source project providing real-time and historical Formula 1 data.`
+Data Sources:
+`This project is powered by the Jolpica F1 API (a community-driven, Ergast-compatible API) for fast, real-time race results and standings, and the OpenF1 API for high-resolution static assets like driver headshots and dynamic circuit maps.`
 
 
 ## Design Guiding Principles

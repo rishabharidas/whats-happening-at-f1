@@ -1,63 +1,82 @@
 import api from "@/utils/api";
 import StandingsClient from "./StandingsClient";
 
+const TEAM_COLORS: Record<string, string> = {
+  "red bull": "3671C6",
+  "mercedes": "27F4D2",
+  "ferrari": "E80020",
+  "mclaren": "FF8000",
+  "aston martin": "229971",
+  "alpine f1 team": "0093cc",
+  "williams": "64C4FF",
+  "rb f1 team": "6692FF",
+  "kick sauber": "52E252",
+  "haas f1 team": "B6BABD",
+  "audi": "E00000",
+  "cadillac f1 team": "FFD700"
+};
+
 export default async function Standings() {
   const { get } = api();
 
-  // Fetch both drivers and constructors standings sequentially to avoid F1 API rate limits
-  const driversRes = await get("/championship_drivers?session_key=latest");
-  const teamsRes = await get("/championship_teams?session_key=latest");
+  // Fetch both drivers and constructors standings sequentially
+  const driversRes = await get("current/driverStandings.json");
+  const teamsRes = await get("current/constructorStandings.json");
 
-  const driversStandingsData = await driversRes.json();
-  const teamsStandingsData = await teamsRes.json();
+  const driversData = await driversRes.json();
+  const teamsData = await teamsRes.json();
 
-  // Extract session key from standings data to query drivers for this session
-  const session_key =
-    Array.isArray(driversStandingsData) && driversStandingsData.length > 0
-      ? driversStandingsData[0].session_key
-      : "latest";
+  // Fetch headshots from OpenF1 (fast static endpoint)
+  let driverImages: Record<number, string> = {};
+  try {
+    const openF1Res = await fetch("https://api.openf1.org/v1/drivers?session_key=latest");
+    const openF1Data = await openF1Res.json();
+    if (Array.isArray(openF1Data)) {
+      openF1Data.forEach((d: any) => {
+        driverImages[d.driver_number] = d.headshot_url;
+      });
+    }
+  } catch (e) {
+    console.error("Failed to fetch driver images from OpenF1", e);
+  }
 
-  const driversResponse = await get(`/drivers?session_key=${session_key}`);
-  const drivers = await driversResponse.json();
+  const driversList =
+    driversData?.MRData?.StandingsTable?.StandingsLists?.[0]?.DriverStandings ||
+    [];
+  const constructorsList =
+    teamsData?.MRData?.StandingsTable?.StandingsLists?.[0]?.ConstructorStandings ||
+    [];
 
-  // Create a map of driver details by their driver number
-  const driversMap = Array.isArray(drivers)
-    ? drivers.reduce(
-        (acc, driver: any) => {
-          acc[driver.driver_number] = driver;
-          return acc;
-        },
-        {} as Record<string, any>,
-      )
-    : {};
+  const driversStandings = driversList.map((driverStanding: any) => {
+    const driver = driverStanding.Driver;
+    const constructor = driverStanding.Constructors?.[0];
+    const teamName = constructor?.name || "";
 
-  // Map drivers standings with their detailed headshot and constructor info
-  const driversStandings = Array.isArray(driversStandingsData)
-    ? driversStandingsData.map((driver: any) => ({
-        ...driver,
-        ...driversMap[driver.driver_number],
-      }))
-    : [];
+    return {
+      position: parseInt(driverStanding.position),
+      full_name: `${driver.givenName} ${driver.familyName}`,
+      driver_number: parseInt(driver.permanentNumber) || 0,
+      team_name: teamName,
+      team_colour: TEAM_COLORS[teamName.toLowerCase()] || "333333",
+      headshot_url: (driverImages[parseInt(driver.permanentNumber)] || "").replace(
+        "1col",
+        "4col"
+      ),
+      points_current: driverStanding.points,
+    };
+  });
 
-  // Map constructor colors dynamically based on drivers team mapping
-  const teamColoursMap = Array.isArray(drivers)
-    ? drivers.reduce(
-        (acc, driver: any) => {
-          if (driver.team_name && driver.team_colour) {
-            acc[driver.team_name.toLowerCase()] = driver.team_colour;
-          }
-          return acc;
-        },
-        {} as Record<string, string>,
-      )
-    : {};
+  const constructorsStandings = constructorsList.map((teamStanding: any) => {
+    const team = teamStanding.Constructor;
+    const teamName = team?.name || "";
 
-  const constructorsStandings = Array.isArray(teamsStandingsData)
-    ? teamsStandingsData.map((team: any) => ({
-        ...team,
-        team_colour: teamColoursMap[team.team_name.toLowerCase()] || "333",
-      }))
-    : [];
+    return {
+      position: parseInt(teamStanding.position),
+      team_name: teamName,
+      team_colour: TEAM_COLORS[teamName.toLowerCase()] || "333333",
+      points_current: teamStanding.points,
+    };
+  });
 
   return (
     <>
