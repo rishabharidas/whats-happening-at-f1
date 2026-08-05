@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function UpcomingSessionClient({
@@ -17,7 +18,7 @@ export default function UpcomingSessionClient({
 
   const formatSessionDate = (dateStr: string) => {
     const d = new Date(dateStr);
-    
+
     if (!mounted) {
       // Fallback for SSR to prevent hydration mismatch (using UTC loosely)
       return {
@@ -52,13 +53,33 @@ export default function UpcomingSessionClient({
             Race <span className="text-red-600">Weekend</span>
           </h2>
         </div>
-        <span className="text-zinc-500 font-mono text-sm uppercase tracking-widest hidden md:block">
-          {mainSession.circuit_short_name} • {mainSession.country_name}
-        </span>
+        <div className="flex items-center gap-4">
+          <span className="text-zinc-500 font-mono text-sm uppercase tracking-widest hidden md:block">
+            {mainSession.circuit_short_name} • {mainSession.country_name}
+          </span>
+          {/* View Full Schedule link */}
+          <Link
+            href="/schedule"
+            id="view-full-schedule"
+            className="group relative inline-flex items-center gap-2 px-4 py-2 text-xs font-black uppercase italic tracking-widest bg-zinc-900 border border-zinc-700 text-zinc-300 hover:border-red-600 hover:text-white transition-all rounded-full"
+          >
+            <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span>Full Schedule</span>
+            <svg
+              className="w-3 h-3 group-hover:translate-x-0.5 transition-transform"
+              fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </Link>
+        </div>
       </div>
 
       {/* PRIMARY SESSION (Big Card) */}
       <div className="relative group overflow-hidden bg-zinc-900 border border-zinc-800 rounded-2xl flex flex-col md:flex-row items-stretch transition-all hover:border-zinc-700">
+        {/* Date block */}
         <div className="bg-red-600 p-8 flex flex-col items-center justify-center text-white md:w-48 border-b md:border-b-0 md:border-r border-dashed border-white/30">
           <span className="text-sm font-bold tracking-widest opacity-80">
             {mainDate.month}
@@ -71,10 +92,8 @@ export default function UpcomingSessionClient({
           </span>
         </div>
 
+        {/* Session info */}
         <div className="flex-1 p-8 flex flex-col justify-center relative">
-          <span className="absolute right-4 bottom-0 text-7xl font-black text-white/3 italic pointer-events-none uppercase">
-            UPNEXT
-          </span>
           <div className="relative z-10">
             <span className="text-red-500 text-[10px] font-black uppercase tracking-[0.2em] mb-2 block">
               Upcoming Session
@@ -89,13 +108,41 @@ export default function UpcomingSessionClient({
           </div>
         </div>
 
+        {/* Circuit image with "UPNEXT" blended on top */}
         {mainSession.circuit_image && (
-          <div className="flex-1 flex items-center justify-center p-8 border-l border-white/5 border-dashed relative z-10">
+          <div className="flex-1 flex items-center justify-center relative overflow-hidden border-l border-white/5 border-dashed min-h-[160px] md:min-h-0">
+            {/* Actual circuit image */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={mainSession.circuit_image}
               alt={mainSession.circuit_short_name}
-              className="w-full max-w-[280px] h-auto object-contain opacity-70 drop-shadow-2xl filter contrast-125"
+              className="w-full max-w-[280px] h-auto object-contain opacity-60 drop-shadow-2xl filter contrast-125 relative z-10 p-8"
             />
+
+            {/* "UPNEXT" text — bottom-right, visible */}
+            <div
+              className="absolute bottom-4 right-5 pointer-events-none z-20 select-none"
+              aria-hidden="true"
+            >
+              <span
+                className="text-3xl font-black italic uppercase leading-none"
+                style={{
+                  letterSpacing: "-0.04em",
+                  paddingRight: "0.1em",
+                  background: "linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(239,68,68,0.35) 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  textShadow: "none",
+                  filter: "drop-shadow(0 2px 12px rgba(239,68,68,0.4))",
+                }}
+              >
+                UPNEXT
+              </span>
+            </div>
+
+            {/* Subtle red glow behind image */}
+            <div className="absolute inset-0 bg-gradient-to-br from-red-600/5 via-transparent to-transparent pointer-events-none" />
           </div>
         )}
       </div>
