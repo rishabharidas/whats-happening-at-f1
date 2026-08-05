@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import api from "@/utils/api";
+import Podium from "@/components/Podium";
 
 export const dynamic = "force-dynamic";
 
@@ -140,7 +141,6 @@ async function RaceResultsContent({ round }: { round: string }) {
   });
 
   const winnerTeamColor = `#${TEAM_COLORS[winner.Constructor.name.toLowerCase()] || "E80020"}`;
-  const winnerHeadshot = driverImages[winner.number];
 
   return (
     <div className="flex flex-col gap-12">
@@ -185,26 +185,21 @@ async function RaceResultsContent({ round }: { round: string }) {
               ))}
             </div>
           </div>
-
-          {/* Headshot */}
-          <div className="relative flex items-end justify-center w-full md:w-72 overflow-hidden min-h-[180px]">
-            {circuitImage && (
-              <img // eslint-disable-line @next/next/no-img-element
-                src={circuitImage}
-                alt="Circuit layout"
-                className="absolute inset-0 w-full h-full object-contain opacity-[0.07] scale-125 filter contrast-125 pointer-events-none"
-              />
-            )}
-            {winnerHeadshot ? (
-              <img // eslint-disable-line @next/next/no-img-element
-                src={winnerHeadshot}
-                alt={`${winner.Driver.givenName} ${winner.Driver.familyName}`}
-                className="relative z-10 h-64 w-auto object-contain drop-shadow-2xl"
-              />
+          {/* Circuit Map */}
+          <div className="w-full md:w-80 border-t md:border-t-0 md:border-l border-zinc-800/80 bg-zinc-950/20 flex flex-col justify-center items-center">
+            {circuitImage ? (
+              <div className="w-full h-48 md:h-64 flex items-center justify-center p-8 relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={circuitImage}
+                  alt="Circuit outline map"
+                  className="w-full h-full object-contain filter invert opacity-75 contrast-125 drop-shadow-[0_0_10px_rgba(255,255,255,0.05)] hover:scale-102 transition-transform duration-300 pointer-events-none"
+                />
+              </div>
             ) : (
-              <div className="w-40 h-40 rounded-full bg-zinc-800 flex items-center justify-center mb-6">
-                <span className="text-4xl font-black text-zinc-600 italic">
-                  {winner.Driver.code}
+              <div className="w-full h-48 md:h-64 flex items-center justify-center">
+                <span className="text-xs font-black text-zinc-600 tracking-widest font-mono uppercase">
+                  Circuit Map N/A
                 </span>
               </div>
             )}
@@ -220,43 +215,27 @@ async function RaceResultsContent({ round }: { round: string }) {
             Podium
           </h3>
         </div>
-        <div className="grid grid-cols-3 gap-3">
-          {[podium[1], podium[0], podium[2]].map((result, i) => {
-            if (!result) return <div key={i} />;
-            const teamColor = `#${TEAM_COLORS[result.Constructor.name.toLowerCase()] || "333"}`;
-            const heights = ["h-36", "h-48", "h-28"];
-            const podiumPos = [2, 1, 3];
-            return (
-              <div key={i} className="flex flex-col items-center gap-2">
-                <span className="text-zinc-300 text-xs font-black font-mono uppercase tracking-widest">
-                  {result.Driver.code}
-                </span>
-                <span className="text-zinc-600 text-[10px] font-mono truncate max-w-full px-1 text-center">
-                  {result.Constructor.name}
-                </span>
-                <div
-                  className={`w-full ${heights[i]} rounded-t-xl flex flex-col items-center justify-start pt-3 relative overflow-hidden`}
-                  style={{
-                    background: `linear-gradient(to bottom, ${teamColor}44, ${teamColor}11)`,
-                    borderTop: `3px solid ${teamColor}`,
-                  }}
-                >
-                  <span className="text-5xl font-black italic text-white/8 absolute top-1 select-none">
-                    {podiumPos[i]}
-                  </span>
-                  <span className="relative z-10 text-2xl font-black italic text-white">
-                    P{podiumPos[i]}
-                  </span>
-                  {result.Time?.time && (
-                    <span className="text-[10px] text-zinc-400 font-mono mt-1 relative z-10">
-                      {result.Time.time}
-                    </span>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        {(() => {
+          const podiumDrivers = podium.map((result: any) => {
+            const driver = result.Driver;
+            const constructor = result.Constructor;
+            const teamName = constructor?.name || "";
+            const driverNumber = String(driver.permanentNumber || result.number);
+            const headshotUrl = driverImages[driverNumber] || "";
+
+            return {
+              position: parseInt(result.position, 10),
+              name_acronym: driver.code,
+              full_name: `${driver.givenName} ${driver.familyName}`,
+              team_name: teamName,
+              team_colour: TEAM_COLORS[teamName.toLowerCase()] || "333333",
+              headshot_url: headshotUrl,
+              time: result.Time?.time || "",
+            };
+          });
+
+          return <Podium drivers={podiumDrivers} />;
+        })()}
       </div>
 
       {/* ── KEY EVENTS ── */}

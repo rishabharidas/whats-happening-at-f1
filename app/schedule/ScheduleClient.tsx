@@ -68,28 +68,8 @@ function RaceCard({
   const nextSession = race.sessions.find((s) => new Date(s.dateStr) > now);
   const isCurrentWeekend = isActive || (isHighlighted && !isPast);
 
-  return (
-    <div
-      ref={cardRef}
-      className={`relative overflow-hidden rounded-2xl border transition-all duration-300 group
-        ${isPast ? "border-zinc-800/50 bg-zinc-900/20 opacity-60" : ""}
-        ${isActive ? "border-red-600/60 bg-zinc-900/60 shadow-xl shadow-red-600/10" : ""}
-        ${!isPast && !isActive ? "border-zinc-800 bg-zinc-900/40 hover:border-zinc-700" : ""}
-      `}
-    >
-      {/* Active pulse ring */}
-      {isActive && (
-        <div className="absolute inset-0 rounded-2xl border border-red-600/30 animate-pulse pointer-events-none" />
-      )}
-
-      {/* CARD HEADER */}
-      <button
-        id={`race-round-${race.round}`}
-        onClick={() => setExpanded((v) => !v)}
-        className="w-full text-left"
-        aria-expanded={expanded}
-      >
-        <div className="flex items-stretch">
+  const cardHeaderInner = (
+    <div className="flex items-stretch">
           {/* Round number / date column */}
           <div
             className={`flex flex-col items-center justify-center px-5 py-5 min-w-[80px] border-r
@@ -103,7 +83,7 @@ function RaceCard({
               R{race.round}
             </span>
             <span className={`text-3xl font-black italic leading-none my-1
-              ${isPast ? "text-zinc-600" : "text-white"}`}>
+              ${isPast ? "text-zinc-650" : "text-white"}`}>
               {raceDate.day}
             </span>
             <span className={`text-[10px] font-bold uppercase tracking-wide
@@ -128,7 +108,7 @@ function RaceCard({
                 )}
               </div>
               <h3 className={`text-lg font-black italic uppercase tracking-tight truncate
-                ${isPast ? "text-zinc-500" : "text-white"}`}>
+                ${isPast ? "text-zinc-500 group-hover:text-red-500 transition-colors" : "text-white"}`}>
                 {race.raceName}
               </h3>
               <p className={`text-xs font-mono mt-0.5 truncate
@@ -140,14 +120,22 @@ function RaceCard({
                   Next: {nextSession.name} — {formatDate(nextSession.dateStr, mounted).full} {formatDate(nextSession.dateStr, mounted).time}
                 </p>
               )}
+              {isPast && race.winner && (
+                <div className="flex md:hidden items-center gap-2 mt-2 flex-wrap">
+                  <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest font-mono">Winner</span>
+                  <span className="text-xs font-black text-zinc-400 italic">{race.winner.name}</span>
+                  <span className="text-[9px] font-medium text-zinc-600 font-mono">({race.winner.team})</span>
+                </div>
+              )}
             </div>
 
-            {/* Winner chip for past races */}
+            {/* Winner chip for past races (Desktop) */}
             {isPast && race.winner && (
               <div className="hidden md:flex items-center gap-2 flex-shrink-0">
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-800/80 border border-zinc-700/50">
-                  <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Winner</span>
-                  <span className="text-xs font-black text-white italic">{race.winner.code}</span>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-850">
+                  <span className="text-[9px] font-black text-red-500 uppercase tracking-widest font-mono">Winner</span>
+                  <span className="text-xs font-black text-white italic">{race.winner.name}</span>
+                  <span className="text-[10px] text-zinc-500 font-mono">({race.winner.team})</span>
                 </div>
               </div>
             )}
@@ -164,19 +152,59 @@ function RaceCard({
               </div>
             )}
 
-            {/* Expand chevron */}
+            {/* Expand chevron or link arrow */}
             <div className={`flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-colors
-              ${isPast ? "text-zinc-700" : "text-zinc-500 group-hover:text-zinc-300"}`}>
-              <svg
-                className={`w-4 h-4 transition-transform duration-300 ${expanded ? "rotate-180" : ""}`}
-                fill="none" stroke="currentColor" viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-              </svg>
+              ${isPast ? "text-zinc-600 group-hover:text-zinc-300" : "text-zinc-500 group-hover:text-zinc-300"}`}>
+              {isPast ? (
+                <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                </svg>
+              ) : (
+                <svg
+                  className={`w-4 h-4 transition-transform duration-300 ${expanded ? "rotate-180" : ""}`}
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                </svg>
+              )}
             </div>
-          </div>
         </div>
-      </button>
+      </div>
+    );
+
+  return (
+    <div
+      ref={cardRef}
+      className={`relative overflow-hidden rounded-2xl border transition-all duration-300 group
+        ${isPast ? "border-zinc-800/50 bg-zinc-900/20 opacity-60 hover:border-zinc-700/80" : ""}
+        ${isActive ? "border-red-600/60 bg-zinc-900/60 shadow-xl shadow-red-600/10" : ""}
+        ${!isPast && !isActive ? "border-zinc-800 bg-zinc-900/40 hover:border-zinc-700" : ""}
+      `}
+    >
+      {/* Active pulse ring */}
+      {isActive && (
+        <div className="absolute inset-0 rounded-2xl border border-red-600/30 animate-pulse pointer-events-none" />
+      )}
+
+      {/* CARD HEADER */}
+      {isPast ? (
+        <Link
+          id={`race-round-${race.round}`}
+          href={`/race/${race.round}`}
+          className="w-full text-left block"
+        >
+          {cardHeaderInner}
+        </Link>
+      ) : (
+        <button
+          id={`race-round-${race.round}`}
+          onClick={() => setExpanded((v) => !v)}
+          className="w-full text-left"
+          aria-expanded={expanded}
+        >
+          {cardHeaderInner}
+        </button>
+      )}
 
       {/* SESSIONS DRAWER */}
       <div
@@ -292,6 +320,7 @@ export default function ScheduleClient({
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 

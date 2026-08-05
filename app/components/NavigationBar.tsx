@@ -139,25 +139,6 @@ export default function NavigationBar() {
     }
   };
 
-  // Smooth scroll handler for anchor links
-  const handleAnchorClick = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-    href: string,
-  ) => {
-    if (href.startsWith("#")) {
-      e.preventDefault();
-      setIsMenuOpen(false);
-
-      // If we are on the homepage, scroll smoothly
-      const element = document.getElementById(href.slice(1));
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
-      } else {
-        // If not on homepage, navigate to homepage with hash
-        window.location.href = `/${href}`;
-      }
-    }
-  };
 
   // Compute transform styles based on active layout states
   const getTransformStyle = (): string | undefined => {
@@ -249,28 +230,34 @@ export default function NavigationBar() {
             : "gap-3 font-mono font-light text-sm text-zinc-300"
         }`}
       >
-        <a
-          href="#last-race-results"
-          onClick={(e) => handleAnchorClick(e, "#last-race-results")}
+        <Link
+          href="/schedule"
+          onClick={() => setIsMenuOpen(false)}
+          className="hover:text-red-500 transition-colors"
+        >
+          schedule
+        </Link>
+        <Link
+          href="/results"
+          onClick={() => setIsMenuOpen(false)}
           className="hover:text-red-500 transition-colors"
         >
           results
-        </a>
-        <a
-          href="#drivers-standings"
-          onClick={(e) => handleAnchorClick(e, "#drivers-standings")}
+        </Link>
+        <Link
+          href="/explore/news"
+          onClick={() => setIsMenuOpen(false)}
           className="hover:text-red-500 transition-colors"
         >
-          drivers
-        </a>
-        <a
-          href="#upcoming-session"
-          onClick={(e) => handleAnchorClick(e, "#upcoming-session")}
+          news
+        </Link>
+        <Link
+          href="/explore"
+          onClick={() => setIsMenuOpen(false)}
           className="hover:text-red-500 transition-colors"
         >
-          upcoming
-        </a>
-        {/* <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-red-500 transition-colors hidden sm:inline-block">github</a> */}
+          explore
+        </Link>
       </div>
 
       {/* Bubble Icon (Hamburger): Visible ONLY in Bubble state */}

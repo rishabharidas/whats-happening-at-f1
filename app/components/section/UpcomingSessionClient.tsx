@@ -43,7 +43,7 @@ export default function UpcomingSessionClient({
   return (
     <div
       id="seasons"
-      className="flex flex-col gap-8 w-full max-w-5xl mx-auto px-4 py-10"
+      className="flex flex-col gap-8 w-full max-w-5xl mx-auto px-4 py-2"
     >
       {/* HEADER */}
       <div className="flex items-end justify-between border-b border-zinc-800 pb-4">

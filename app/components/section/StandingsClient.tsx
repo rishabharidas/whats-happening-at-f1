@@ -48,7 +48,7 @@ export default function StandingsClient({
   );
 
   return (
-    <div className="w-full max-w-5xl mx-auto flex flex-col gap-6">
+    <div className="w-full flex flex-col gap-6">
       {/* TABS & SEARCH BAR ROW */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-zinc-800 pb-6">
         {/* Modern Segmented Control Tab Switcher */}
@@ -122,7 +122,7 @@ export default function StandingsClient({
       {/* STANDINGS CONTAINER */}
       <div className="relative bg-zinc-950/20 border border-zinc-900 rounded-2xl p-4 md:p-6 overflow-hidden">
         {/* Header Label Row */}
-        <div className="flex items-center px-4 py-3 text-xs font-bold uppercase text-zinc-500 tracking-widest border-b border-zinc-800/40 mb-3">
+        <div className="flex items-center pl-4 pr-10 py-3 text-xs font-bold uppercase text-zinc-500 tracking-widest border-b border-zinc-800/40 mb-3">
           <span className="w-12 text-center">Pos</span>
           <span className="flex-1 ml-4">
             {activeTab === "drivers" ? "Driver" : "Constructor"}
@@ -134,7 +134,7 @@ export default function StandingsClient({
         </div>
 
         {/* Scrollable list box with customized thin scrollbar to avoid hijack */}
-        <div className="max-h-[550px] overflow-y-auto pr-2 flex flex-col gap-2.5 scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
+        <div className="max-h-[550px] overflow-y-auto overscroll-contain pr-2 flex flex-col gap-2.5 custom-scrollbar">
           {activeTab === "drivers" ? (
             filteredDrivers.length > 0 ? (
               filteredDrivers.map((driver, index) => (

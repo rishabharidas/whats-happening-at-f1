@@ -1,5 +1,6 @@
 import api from "@/utils/api";
-import Image from "next/image";
+import Link from "next/link";
+import Podium from "../Podium";
 
 const TEAM_COLORS: Record<string, string> = {
   "red bull": "3671C6",
@@ -69,82 +70,40 @@ export default async function Results() {
     };
   });
 
-  // Reorder for podium display: 2nd, 1st, 3rd
-  const podiumOrder = [resultData[1], resultData[0], resultData[2]].filter(
-    Boolean,
-  );
-
   return (
-    <div className="py-16 px-4 flex flex-col items-center justify-center bg-[#0a0a0a] overflow-hidden w-full">
-      <div className="text-center mb-12">
-        <h3 className="text-blue-500 font-mono tracking-widest uppercase text-sm mb-2">
-          Latest Grand Prix
-        </h3>
-        <h2 className="text-4xl md:text-5xl font-black italic uppercase text-white tracking-tighter">
-          {sessionName} <span className="text-zinc-700">Results</span>
-        </h2>
-      </div>
-
-      <div className="flex items-end justify-center w-full max-w-4xl gap-2 md:gap-6 h-100">
-        {podiumOrder.map((driver, index) => {
-          const isWinner = driver?.position === 1;
-          const heightClass = isWinner
-            ? "h-64"
-            : driver?.position === 2
-              ? "h-48"
-              : "h-36";
-          const bgColor = `#${driver?.team_colour || "333"}`;
-
-          return (
-            <div
-              key={index}
-              className="relative flex flex-col items-center flex-1 max-w-50"
+    <div className="flex flex-col gap-8 w-full max-w-5xl mx-auto px-4 py-2">
+      {/* HEADER */}
+      <div className="flex items-end justify-between border-b border-zinc-800 pb-4">
+        <div className="flex items-center gap-4">
+          <div className="h-8 w-1 bg-red-600" />
+          <h2 className="text-3xl font-black italic uppercase text-white tracking-tighter">
+            Latest <span className="text-red-600">Results</span>
+          </h2>
+        </div>
+        <div className="flex items-center gap-4">
+          <span className="text-zinc-500 font-mono text-sm uppercase tracking-widest hidden md:block">
+            {sessionName}
+          </span>
+          <Link
+            href="/results"
+            id="view-all-results"
+            className="group relative inline-flex items-center gap-2 px-4 py-2 text-xs font-black uppercase italic tracking-widest bg-zinc-900 border border-zinc-700 text-zinc-300 hover:border-red-600 hover:text-white transition-all rounded-full"
+          >
+            <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+            </svg>
+            <span>All Results</span>
+            <svg
+              className="w-3 h-3 group-hover:translate-x-0.5 transition-transform"
+              fill="none" stroke="currentColor" viewBox="0 0 24 24"
             >
-              <div
-                className={`relative z-10 transition-transform duration-500 hover:scale-105 ${isWinner ? "w-32 md:w-44" : "w-24 md:w-32"}`}
-              >
-                {isWinner && (
-                  <div className="absolute inset-0 bg-white/20 blur-[60px] rounded-full animate-pulse" />
-                )}
-                {driver?.headshot_url ? (
-                  <Image
-                    src={driver.headshot_url}
-                    alt={driver.full_name || "Driver"}
-                    width={200}
-                    height={200}
-                    className="object-contain drop-shadow-2xl"
-                  />
-                ) : (
-                  <div className="w-24 h-24 md:w-32 md:h-32 bg-zinc-800 flex items-center justify-center text-sm text-zinc-500 font-bold uppercase tracking-tight rounded-full mx-auto">
-                    F1
-                  </div>
-                )}
-              </div>
-
-              <div
-                className={`relative w-full ${heightClass} flex flex-col items-center justify-start pt-4 rounded-t-xl overflow-hidden`}
-                style={{
-                  background: `linear-gradient(to bottom, ${bgColor}CC, #1a1a1a)`,
-                  borderTop: `4px solid ${bgColor}`,
-                }}
-              >
-                <span className="absolute top-2 text-6xl md:text-8xl font-black text-white/10 italic select-none">
-                  {driver?.position}
-                </span>
-
-                <div className="z-20 text-center px-2">
-                  <p className="text-xs md:text-sm font-bold text-white/60 uppercase">
-                    {driver?.name_acronym}
-                  </p>
-                  <p className="hidden md:block text-xs font-medium text-white/40 truncate">
-                    {driver?.team_name}
-                  </p>
-                </div>
-              </div>
-            </div>
-          );
-        })}
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </Link>
+        </div>
       </div>
+
+      <Podium drivers={resultData} />
     </div>
   );
 }

@@ -79,14 +79,18 @@ export default async function Standings() {
   });
 
   return (
-    <>
-      <h2 className="text-4xl md:text-5xl font-black italic uppercase text-white tracking-tighter underline underline-offset-8 mb-12 text-center md:text-left">
-        Season <span className="text-red-600">Standings</span>
-      </h2>
+    <div className="w-full max-w-5xl mx-auto px-4">
+      {/* HEADER */}
+      <div className="flex items-center gap-4 mb-8">
+        <div className="h-8 w-1 bg-red-600" />
+        <h2 className="text-3xl font-black italic uppercase text-white tracking-tighter">
+          Season <span className="text-red-600">Standings</span>
+        </h2>
+      </div>
       <StandingsClient
         driversStandings={driversStandings}
         constructorsStandings={constructorsStandings}
       />
-    </>
+    </div>
   );
 }
