@@ -23,10 +23,10 @@ const PADDOCK_FAST_FACTS = [
     color: "from-yellow-500 to-amber-600",
   },
   {
-    number: "1:18.8",
+    number: "1:18.792",
     title: "Fastest Ever Lap (Monza)",
-    holder: "Lewis Hamilton (2020)",
-    desc: "Recorded at an average speed of 264.362 km/h (164.267 mph) during qualifying.",
+    holder: "Max Verstappen (2025)",
+    desc: "Recorded at an average speed of 264.7 km/h (164.5 mph) during qualifying - beating Lewis Hamilton's 2020 benchmark.",
     color: "from-emerald-500 to-teal-600",
   },
 ];
