@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 
 interface DriverStanding {
@@ -32,6 +32,21 @@ export default function StandingsClient({
   );
   const [searchQuery, setSearchQuery] = useState("");
 
+  useEffect(() => {
+    const handleHash = () => {
+      if (typeof window !== "undefined") {
+        if (window.location.hash === "#constructors-standings") {
+          setActiveTab("constructors");
+        } else if (window.location.hash === "#drivers-standings") {
+          setActiveTab("drivers");
+        }
+      }
+    };
+    handleHash();
+    window.addEventListener("hashchange", handleHash);
+    return () => window.removeEventListener("hashchange", handleHash);
+  }, []);
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
@@ -48,7 +63,7 @@ export default function StandingsClient({
   );
 
   return (
-    <div className="w-full flex flex-col gap-6">
+    <div id="constructors-standings" className="w-full flex flex-col gap-6 scroll-mt-24">
       {/* TABS & SEARCH BAR ROW */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-zinc-800 pb-6">
         {/* Modern Segmented Control Tab Switcher */}

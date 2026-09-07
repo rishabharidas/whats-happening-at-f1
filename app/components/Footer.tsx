@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Footer() {
   return (
     <footer className="mt-20 border-t border-zinc-800 bg-[#0a0a0a] pt-16 pb-8">
@@ -5,63 +7,63 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
           {/* Brand Column */}
           <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-red-600 skew-x-[-20deg]" />
+            <Link href="/" className="flex items-center gap-2 group w-fit">
+              <div className="w-6 h-6 bg-red-600 skew-x-[-20deg] group-hover:bg-red-500 transition-colors" />
               <span className="text-xl font-black italic tracking-tighter text-white uppercase">
                 WHATS<span className="text-red-600 text-2xl">HAPPENING</span>@F1
               </span>
-            </div>
+            </Link>
             <p className="text-zinc-500 text-sm max-w-70 leading-relaxed">
-              Your ultimate destination for real-time Formula 1 data, race
-              results, and championship standings.
+              Your high-performance dashboard for real-time Formula 1 session
+              results, race calendars, and championship standings.
             </p>
           </div>
 
-          {/* Quick Links */}
+          {/* Quick Links (Curated Essential 4) */}
           <div className="grid grid-cols-2 gap-8 md:justify-center">
             <div className="flex flex-col gap-3">
-              <h4 className="text-white text-xs font-bold uppercase tracking-widest mb-2">
+              <h4 className="text-white text-xs font-bold uppercase tracking-widest mb-1">
                 Racing
               </h4>
-              <a
-                href="#last-race-results"
-                className="text-zinc-500 hover:text-red-500 text-sm transition-colors uppercase font-medium"
-              >
-                Results
-              </a>
-              <a
-                href="#upcoming-session"
-                className="text-zinc-500 hover:text-red-500 text-sm transition-colors uppercase font-medium"
+              <Link
+                href="/schedule"
+                className="text-zinc-400 hover:text-white hover:translate-x-0.5 transition-all text-sm uppercase font-medium"
               >
                 Schedule
-              </a>
+              </Link>
+              <Link
+                href="/results"
+                className="text-zinc-400 hover:text-white hover:translate-x-0.5 transition-all text-sm uppercase font-medium"
+              >
+                Results
+              </Link>
             </div>
             <div className="flex flex-col gap-3">
-              <h4 className="text-white text-xs font-bold uppercase tracking-widest mb-2">
-                Rankings
+              <h4 className="text-white text-xs font-bold uppercase tracking-widest mb-1">
+                Overview
               </h4>
-              <a
-                href="#drivers-standings"
-                className="text-zinc-500 hover:text-red-500 text-sm transition-colors uppercase font-medium"
+              <Link
+                href="/#drivers-standings"
+                className="text-zinc-400 hover:text-white hover:translate-x-0.5 transition-all text-sm uppercase font-medium"
               >
-                Drivers
-              </a>
-              <a
-                href="#constructors-standings"
-                className="text-zinc-500 hover:text-red-500 text-sm transition-colors uppercase font-medium"
+                Standings
+              </Link>
+              <Link
+                href="/explore/news"
+                className="text-zinc-400 hover:text-white hover:translate-x-0.5 transition-all text-sm uppercase font-medium"
               >
-                Teams
-              </a>
+                Paddock News
+              </Link>
             </div>
           </div>
 
-          {/* Contact/Newsletter Placeholder */}
+          {/* Attribution & Socials */}
           <div className="flex flex-col items-start md:items-end gap-4">
             <div className="flex gap-4">
-              {/* Social Placeholders */}
               {["Twitter", "Instagram", "GitHub"].map((social) => (
                 <div
                   key={social}
+                  aria-label={social}
                   className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center cursor-pointer hover:border-red-600 transition-colors"
                 >
                   <div className="w-3 h-3 bg-zinc-600 rounded-sm" />
@@ -69,9 +71,9 @@ export default function Footer() {
               ))}
             </div>
             <p className="text-zinc-600 text-xs text-start md:text-right">
-              Data provided via OpenF1 API.
+              Powered by Jolpica F1 & OpenF1 API.
               <br />
-              Not affiliated with Formula 1.
+              Unofficial fan application.
             </p>
           </div>
         </div>
