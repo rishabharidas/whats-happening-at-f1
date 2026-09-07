@@ -37,6 +37,17 @@ function formatDate(dateStr: string, mounted: boolean) {
   };
 }
 
+function getSessionSlug(name: string): string {
+  const l = name.toLowerCase();
+  if (l.includes("practice 1")) return "practice-1";
+  if (l.includes("practice 2")) return "practice-2";
+  if (l.includes("practice 3")) return "practice-3";
+  if (l.includes("sprint qualifying") || l.includes("shootout")) return "sprint-qualifying";
+  if (l === "sprint") return "sprint";
+  if (l.includes("qualifying")) return "qualifying";
+  return "race";
+}
+
 function RaceCard({
   race,
   isHighlighted,
@@ -212,15 +223,20 @@ function RaceCard({
           ${expanded ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"}`}
       >
         <div className="px-6 pb-5 pt-0">
-          {/* Past race: show View Results CTA */}
-          {isPast && (
+          {/* Race CTA: show View Results if past or in progress */}
+          {(isPast || race.sessions.some((s) => new Date(s.dateStr) < now)) && (
             <div className="border-t border-zinc-800/30 pt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <div>
-                {race.winner && (
+                {race.winner ? (
                   <div className="mb-2">
                     <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-mono block">Race Winner</span>
                     <span className="text-base font-black italic text-white">{race.winner.name}</span>
                     <span className="text-xs text-zinc-500 font-mono ml-2">{race.winner.team}</span>
+                  </div>
+                ) : (
+                  <div className="mb-2">
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-mono block">Race Weekend</span>
+                    <span className="text-base font-black italic text-white">Session Results Available</span>
                   </div>
                 )}
               </div>
@@ -228,7 +244,7 @@ function RaceCard({
                 href={`/race/${race.round}`}
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white text-xs font-black uppercase italic tracking-widest rounded-xl transition-colors flex-shrink-0"
               >
-                View Full Results
+                {isPast ? "View Full Results" : "View Weekend Results"}
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
@@ -249,7 +265,7 @@ function RaceCard({
                 <div
                   key={idx}
                   className={`relative flex items-center gap-3 px-4 py-3 rounded-xl border transition-all
-                    ${sessionPast ? "border-zinc-800/30 bg-zinc-900/20 opacity-50" : ""}
+                    ${sessionPast ? "border-zinc-800/30 bg-zinc-900/20 opacity-70 hover:opacity-100 hover:border-zinc-700" : ""}
                     ${isNextUp ? "border-red-600/50 bg-red-600/5" : ""}
                     ${!sessionPast && !isNextUp ? "border-zinc-800/50 bg-zinc-900/30 hover:border-zinc-700" : ""}
                   `}
@@ -264,23 +280,30 @@ function RaceCard({
                     <span className={`text-[10px] font-bold uppercase ${sessionPast ? "text-zinc-600" : "text-zinc-500"}`}>
                       {sDate.weekday}
                     </span>
-                    <span className={`text-xl font-black italic leading-none ${sessionPast ? "text-zinc-600" : "text-white"}`}>
+                    <span className={`text-xl font-black italic leading-none ${sessionPast ? "text-zinc-500" : "text-white"}`}>
                       {sDate.day}
                     </span>
                   </div>
                   <div className="flex flex-col min-w-0">
                     <span className={`text-xs font-black uppercase tracking-tight truncate
-                      ${sessionPast ? "text-zinc-600" : isNextUp ? "text-red-400" : "text-zinc-300"}`}>
+                      ${sessionPast ? "text-zinc-400" : isNextUp ? "text-red-400" : "text-zinc-300"}`}>
                       {session.name}
                     </span>
-                    <span className={`text-xs font-mono ${sessionPast ? "text-zinc-700" : "text-zinc-500"}`}>
+                    <span className={`text-xs font-mono ${sessionPast ? "text-zinc-600" : "text-zinc-500"}`}>
                       {sDate.time}
                     </span>
                   </div>
                   {sessionPast && (
-                    <svg className="ml-auto w-3.5 h-3.5 text-zinc-700 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                    </svg>
+                    <Link
+                      href={`/race/${race.round}?session=${getSessionSlug(session.name)}`}
+                      className="ml-auto inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-red-400 hover:text-white bg-red-600/10 hover:bg-red-600 px-2 py-1 rounded-md transition-all flex-shrink-0"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Results
+                      <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </Link>
                   )}
                 </div>
               );
