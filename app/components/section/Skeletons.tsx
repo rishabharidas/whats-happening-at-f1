@@ -62,7 +62,7 @@ export function UpcomingSessionSkeleton() {
 
 export function ResultsSkeleton() {
   return (
-    <div className="flex flex-col gap-6 w-full max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-6 animate-pulse">
+    <div className="flex flex-col gap-6 w-full max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-2 animate-pulse">
       {/* HEADER SKELETON */}
       <div className="flex items-end justify-between border-b border-zinc-800 pb-4">
         <div className="flex items-center gap-4">

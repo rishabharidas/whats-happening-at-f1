@@ -57,3 +57,114 @@ body {
   scrollbar-width: thin;
   scrollbar-color: #27272a transparent;
 }
+
+/* Hide scrollbar for horizontal swipe rails */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Formula 1 Race Starting Lights-Out Gantry Sequence */
+@keyframes f1-light-1 {
+  0%, 10% {
+    background-color: #18181b;
+    box-shadow: none;
+    border-color: #27272a;
+  }
+  15%, 75% {
+    background-color: #dc2626;
+    box-shadow: 0 0 24px #ef4444, 0 0 45px rgba(239, 68, 68, 0.7);
+    border-color: #f87171;
+  }
+  80%, 100% {
+    background-color: #18181b;
+    box-shadow: none;
+    border-color: #27272a;
+  }
+}
+
+@keyframes f1-light-2 {
+  0%, 25% {
+    background-color: #18181b;
+    box-shadow: none;
+    border-color: #27272a;
+  }
+  30%, 75% {
+    background-color: #dc2626;
+    box-shadow: 0 0 24px #ef4444, 0 0 45px rgba(239, 68, 68, 0.7);
+    border-color: #f87171;
+  }
+  80%, 100% {
+    background-color: #18181b;
+    box-shadow: none;
+    border-color: #27272a;
+  }
+}
+
+@keyframes f1-light-3 {
+  0%, 40% {
+    background-color: #18181b;
+    box-shadow: none;
+    border-color: #27272a;
+  }
+  45%, 75% {
+    background-color: #dc2626;
+    box-shadow: 0 0 24px #ef4444, 0 0 45px rgba(239, 68, 68, 0.7);
+    border-color: #f87171;
+  }
+  80%, 100% {
+    background-color: #18181b;
+    box-shadow: none;
+    border-color: #27272a;
+  }
+}
+
+@keyframes f1-light-4 {
+  0%, 55% {
+    background-color: #18181b;
+    box-shadow: none;
+    border-color: #27272a;
+  }
+  60%, 75% {
+    background-color: #dc2626;
+    box-shadow: 0 0 24px #ef4444, 0 0 45px rgba(239, 68, 68, 0.7);
+    border-color: #f87171;
+  }
+  80%, 100% {
+    background-color: #18181b;
+    box-shadow: none;
+    border-color: #27272a;
+  }
+}
+
+@keyframes f1-light-5 {
+  0%, 70% {
+    background-color: #18181b;
+    box-shadow: none;
+    border-color: #27272a;
+  }
+  73%, 75% {
+    background-color: #dc2626;
+    box-shadow: 0 0 24px #ef4444, 0 0 45px rgba(239, 68, 68, 0.7);
+    border-color: #f87171;
+  }
+  80%, 100% {
+    background-color: #18181b;
+    box-shadow: none;
+    border-color: #27272a;
+  }
+}
+
+.animate-f1-light-1 { animation: f1-light-1 2.8s infinite ease-in-out; }
+.animate-f1-light-2 { animation: f1-light-2 2.8s infinite ease-in-out; }
+.animate-f1-light-3 { animation: f1-light-3 2.8s infinite ease-in-out; }
+.animate-f1-light-4 { animation: f1-light-4 2.8s infinite ease-in-out; }
+.animate-f1-light-5 { animation: f1-light-5 2.8s infinite ease-in-out; }
+
+/* Immediate suppression of start overlay once session flag is set */
+html.f1-lights-done #f1-start-overlay {
+  display: none !important;
+}

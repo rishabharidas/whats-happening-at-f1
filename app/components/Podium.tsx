@@ -1,5 +1,10 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import TeamLogo from "@/components/TeamLogo";
 
 export interface PodiumDriver {
@@ -38,6 +43,62 @@ export default function Podium({
   circuitLocation,
   championshipStandings,
 }: PodiumProps) {
+  const podiumRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      // Podium header reveal - triggers early so it's ready as user scrolls
+      gsap.from(".podium-header-anim", {
+        scrollTrigger: {
+          trigger: podiumRef.current,
+          start: "top 95%",
+          once: true,
+        },
+        opacity: 0,
+        y: 12,
+        duration: 0.35,
+        ease: "power2.out",
+        clearProps: "all",
+      });
+
+      // Podium cards step-up reveal - snappy and fast
+      gsap.from(".podium-card-anim", {
+        scrollTrigger: {
+          trigger: podiumRef.current,
+          start: "top 92%",
+          once: true,
+        },
+        opacity: 0,
+        y: 16,
+        scale: 0.99,
+        duration: 0.35,
+        stagger: 0.05,
+        ease: "power2.out",
+        clearProps: "all",
+      });
+
+      // Championship summary bar slide-up - quick follow-up
+      gsap.from(".podium-summary-anim", {
+        scrollTrigger: {
+          trigger: podiumRef.current,
+          start: "top 88%",
+          once: true,
+        },
+        opacity: 0,
+        y: 12,
+        duration: 0.35,
+        delay: 0.05,
+        ease: "power2.out",
+        clearProps: "all",
+      });
+    }, podiumRef);
+
+    return () => ctx.revert();
+  }, []);
+
   if (!drivers || drivers.length === 0) return null;
 
   // Standard F1 podium drivers
@@ -131,9 +192,12 @@ export default function Podium({
         ];
 
   return (
-    <div className="relative w-full max-w-6xl mx-auto flex flex-col items-center">
+    <div
+      ref={podiumRef}
+      className="relative w-full max-w-6xl mx-auto flex flex-col items-center"
+    >
       {/* ── BROADCAST HEADER STRIP (FORMULA 1 | GRAND PRIX & CIRCUIT TRACKWATERMARK) ── */}
-      <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 border-b border-white/5 pb-2.5 sm:pb-3 mb-4 sm:mb-6 md:mb-8 text-xs font-mono min-w-0">
+      <div className="podium-header-anim w-full flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 border-b border-white/5 pb-2.5 sm:pb-3 mb-4 sm:mb-6 md:mb-8 text-xs font-mono min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-black italic text-red-600 text-xs sm:text-sm tracking-wider">
             F1
@@ -215,7 +279,7 @@ export default function Podium({
           return (
             <div
               key={`${driver.name_acronym || driver.full_name}-${position}`}
-              className={`group relative flex flex-col items-center ${styling.cardWidth} ${styling.orderClass} ${styling.elevation} transition-all duration-300 hover:-translate-y-1.5`}
+              className={`podium-card-anim group relative flex flex-col items-center ${styling.cardWidth} ${styling.orderClass} ${styling.elevation} transition-all duration-300 hover:-translate-y-1.5`}
             >
               {/* DRIVER PORTRAIT */}
               {/* Scaled down on mobile to prevent dominating the screen; grand & elevated on desktop */}
@@ -382,7 +446,7 @@ export default function Podium({
       <Link
         href="#drivers-standings"
         aria-label="View Full Driver Championship Standings"
-        className="group relative z-20 w-full max-w-full mt-1 sm:mt-2 rounded-xl sm:rounded-2xl border border-zinc-800/90 bg-gradient-to-r from-[#0c0e14] via-[#10131a] to-[#0c0e14] px-3 py-2.5 sm:px-5 sm:py-3 md:px-6 md:py-3.5 shadow-xl flex flex-col md:flex-row items-center justify-between gap-2.5 sm:gap-3 md:gap-4 transition-all duration-300 hover:border-zinc-700 hover:bg-zinc-900/60 overflow-hidden"
+        className="podium-summary-anim group relative z-20 w-full max-w-full mt-1 sm:mt-2 rounded-xl sm:rounded-2xl border border-zinc-800/90 bg-gradient-to-r from-[#0c0e14] via-[#10131a] to-[#0c0e14] px-3 py-2.5 sm:px-5 sm:py-3 md:px-6 md:py-3.5 shadow-xl flex flex-col md:flex-row items-center justify-between gap-2.5 sm:gap-3 md:gap-4 transition-all duration-300 hover:border-zinc-700 hover:bg-zinc-900/60 overflow-hidden"
       >
         {/* Left Side: Slanted Hazard Accents + F1 Mark + Championship Title */}
         <div className="flex items-center gap-2 sm:gap-3 w-full md:w-auto justify-between sm:justify-start">

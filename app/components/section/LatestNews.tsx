@@ -121,6 +121,32 @@ export default async function LatestNews() {
           </div>
         ))}
       </div>
+
+      {/* EXPLORE HUB DISCOVERY STRIP */}
+      <div className="mt-4 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-zinc-900/90 via-zinc-900/60 to-red-950/30 border border-zinc-800 hover:border-red-600/40 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-red-600/10 border border-red-500/20 flex items-center justify-center text-red-500 flex-shrink-0">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z" />
+            </svg>
+          </div>
+          <div>
+            <h4 className="text-sm font-black italic uppercase tracking-tight text-white">
+              Hungry for more motorsport culture?
+            </h4>
+            <p className="text-xs text-zinc-400 font-sans mt-0.5">
+              Listen to unfiltered team radios, browse the technical lexicon, and explore Hall of Fame legends.
+            </p>
+          </div>
+        </div>
+        <Link
+          href="/explore"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-mono font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-red-600/20 flex-shrink-0"
+        >
+          <span>Explore The Paddock</span>
+          <span aria-hidden="true">&rarr;</span>
+        </Link>
+      </div>
     </div>
   );
 }

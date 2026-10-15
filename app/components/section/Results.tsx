@@ -17,11 +17,49 @@ const TEAM_COLORS: Record<string, string> = {
   "cadillac f1 team": "FFD700"
 };
 
+const DRIVER_HEADSHOTS_FALLBACK: Record<string | number, string> = {
+  1: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/M/MAXVER01_Max_Verstappen/maxver01.png.transform/4col/image.png",
+  3: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/M/MAXVER01_Max_Verstappen/maxver01.png.transform/4col/image.png",
+  4: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/L/LANDOR01_Lando_Norris/landor01.png.transform/4col/image.png",
+  16: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/C/CHALEC01_Charles_Leclerc/chalec01.png.transform/4col/image.png",
+  81: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/O/OSCPIA01_Oscar_Piastri/oscpia01.png.transform/4col/image.png",
+  55: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/C/CARSAI01_Carlos_Sainz/carsai01.png.transform/4col/image.png",
+  63: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/G/GEORUS01_George_Russell/georus01.png.transform/4col/image.png",
+  44: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/L/LEWHAM01_Lewis_Hamilton/lewham01.png.transform/4col/image.png",
+  12: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/K/ANDANT01_Kimi_Antonelli/andant01.png.transform/4col/image.png",
+  VER: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/M/MAXVER01_Max_Verstappen/maxver01.png.transform/4col/image.png",
+  NOR: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/L/LANDOR01_Lando_Norris/landor01.png.transform/4col/image.png",
+  LEC: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/C/CHALEC01_Charles_Leclerc/chalec01.png.transform/4col/image.png",
+  PIA: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/O/OSCPIA01_Oscar_Piastri/oscpia01.png.transform/4col/image.png",
+  SAI: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/C/CARSAI01_Carlos_Sainz/carsai01.png.transform/4col/image.png",
+  RUS: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/G/GEORUS01_George_Russell/georus01.png.transform/4col/image.png",
+  HAM: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/L/LEWHAM01_Lewis_Hamilton/lewham01.png.transform/4col/image.png",
+  ANT: "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/K/ANDANT01_Kimi_Antonelli/andant01.png.transform/4col/image.png",
+};
+
 export default async function Results() {
   const { get } = api();
 
-  const results_response = await get("current/last/results.json");
-  const data = await results_response.json();
+  // 1. Parallel fetch for race results, standings, and OpenF1 driver images (no sequential waterfall)
+  const [resultsRes, standingsRes, openF1Res] = await Promise.all([
+    get("current/last/results.json").catch(() => null),
+    get("current/driverStandings.json").catch(() => null),
+    fetch("https://api.openf1.org/v1/drivers?session_key=latest", {
+      next: { revalidate: 3600 },
+      signal: AbortSignal.timeout(1800),
+    }).catch(() => null),
+  ]);
+
+  if (!resultsRes || !resultsRes.ok) {
+    return null;
+  }
+
+  // 2. Parallel JSON parse
+  const [data, standingsData, openF1Data] = await Promise.all([
+    resultsRes.json().catch(() => null),
+    standingsRes && standingsRes.ok ? standingsRes.json().catch(() => null) : null,
+    openF1Res && openF1Res.ok ? openF1Res.json().catch(() => null) : null,
+  ]);
 
   const race = data?.MRData?.RaceTable?.Races?.[0];
   if (!race) {
@@ -37,21 +75,15 @@ export default async function Results() {
 
   // Get podium (top 3)
   const podiumResults = results.slice(0, 3);
-  
-  // Fetch headshots from OpenF1 (fast static endpoint)
-  let driverImages: Record<number, string> = {};
-  try {
-    const openF1Res = await fetch("https://api.openf1.org/v1/drivers?session_key=latest", {
-      next: { revalidate: 60 },
-    });
-    const openF1Data = await openF1Res.json();
-    if (Array.isArray(openF1Data)) {
-      openF1Data.forEach((d: any) => {
+
+  // Build driver images map from OpenF1
+  const driverImages: Record<number, string> = {};
+  if (Array.isArray(openF1Data)) {
+    openF1Data.forEach((d: any) => {
+      if (typeof d.driver_number === "number" && d.headshot_url) {
         driverImages[d.driver_number] = d.headshot_url;
-      });
-    }
-  } catch (e) {
-    console.error("Failed to fetch driver images from OpenF1", e);
+      }
+    });
   }
 
   const resultData = podiumResults.map((result: any) => {
@@ -59,42 +91,40 @@ export default async function Results() {
     const constructor = result.Constructor;
     const teamName = constructor?.name || "";
     const driverNum = parseInt(result.number, 10);
+    const driverCode = driver.code || "";
+
+    const headshotRaw =
+      driverImages[driverNum] ||
+      DRIVER_HEADSHOTS_FALLBACK[driverNum] ||
+      DRIVER_HEADSHOTS_FALLBACK[driverCode] ||
+      "";
 
     return {
       position: parseInt(result.position, 10),
-      name_acronym: driver.code,
+      name_acronym: driverCode,
       full_name: `${driver.givenName} ${driver.familyName}`,
       team_name: teamName,
       team_colour: TEAM_COLORS[teamName.toLowerCase()] || "333333",
-      headshot_url: (driverImages[driverNum] || "").replace(
-        "1col",
-        "4col"
-      ),
+      headshot_url: headshotRaw.replace("1col", "4col"),
       time: result.Time?.time || (parseInt(result.position, 10) === 1 ? "Winner" : undefined),
       points: result.points,
       driver_number: result.number || driver.permanentNumber,
     };
   });
 
-  // Fetch top 3 championship standings for the integrated podium summary bar
+  // Extract top 3 championship standings for the integrated podium summary bar
   let championshipStandings: any[] = [];
-  try {
-    const standingsRes = await get("current/driverStandings.json");
-    if (standingsRes.ok) {
-      const standingsData = await standingsRes.json();
-      const list =
-        standingsData?.MRData?.StandingsTable?.StandingsLists?.[0]?.DriverStandings || [];
-      championshipStandings = list.slice(0, 3).map((ds: any) => ({
-        position: parseInt(ds.position, 10),
-        name: ds.Driver.familyName,
-        full_name: `${ds.Driver.givenName} ${ds.Driver.familyName}`,
-        team: ds.Constructors?.[0]?.name || "",
-        team_colour: TEAM_COLORS[ds.Constructors?.[0]?.name?.toLowerCase() || ""] || "333333",
-        points: ds.points,
-      }));
-    }
-  } catch (e) {
-    console.error("Failed to fetch driver standings for podium summary", e);
+  if (standingsData) {
+    const list =
+      standingsData?.MRData?.StandingsTable?.StandingsLists?.[0]?.DriverStandings || [];
+    championshipStandings = list.slice(0, 3).map((ds: any) => ({
+      position: parseInt(ds.position, 10),
+      name: ds.Driver.familyName,
+      full_name: `${ds.Driver.givenName} ${ds.Driver.familyName}`,
+      team: ds.Constructors?.[0]?.name || "",
+      team_colour: TEAM_COLORS[ds.Constructors?.[0]?.name?.toLowerCase() || ""] || "333333",
+      points: ds.points,
+    }));
   }
 
   const circuitLoc = race.Circuit?.Location

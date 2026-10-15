@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
+import gsap from "gsap";
 import TeamLogo from "@/components/TeamLogo";
 
 interface DriverStanding {
@@ -49,6 +50,17 @@ export default function StandingsClient({
     window.addEventListener("hashchange", handleHash);
     return () => window.removeEventListener("hashchange", handleHash);
   }, []);
+
+  // GSAP tab switch animation
+  useEffect(() => {
+    if (typeof window !== "undefined" && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      gsap.fromTo(
+        ".standings-row-anim",
+        { opacity: 0, y: 8 },
+        { opacity: 1, y: 0, duration: 0.3, stagger: 0.02, ease: "power2.out", clearProps: "all" }
+      );
+    }
+  }, [activeTab]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -200,7 +212,7 @@ export default function StandingsClient({
                 return (
                   <div
                     key={`${driver.driver_number}-${pos}`}
-                    className={`group flex items-center px-4 sm:px-6 py-2.5 sm:py-3 transition-colors duration-150 hover:bg-zinc-850/50 ${
+                    className={`standings-row-anim group flex items-center px-4 sm:px-6 py-2.5 sm:py-3 transition-colors duration-150 hover:bg-zinc-850/50 ${
                       isP1
                         ? "bg-amber-500/[0.04]"
                         : isP2
@@ -345,7 +357,7 @@ export default function StandingsClient({
               return (
                 <div
                   key={`${team.team_name}-${pos}`}
-                  className={`group flex items-center px-4 sm:px-6 py-3 transition-colors duration-150 hover:bg-zinc-850/50 ${
+                  className={`standings-row-anim group flex items-center px-4 sm:px-6 py-3 transition-colors duration-150 hover:bg-zinc-850/50 ${
                     isP1
                       ? "bg-amber-500/[0.04]"
                       : isP2
