@@ -29,7 +29,9 @@ export default async function Standings() {
   // Fetch headshots from OpenF1 (fast static endpoint)
   let driverImages: Record<number, string> = {};
   try {
-    const openF1Res = await fetch("https://api.openf1.org/v1/drivers?session_key=latest");
+    const openF1Res = await fetch("https://api.openf1.org/v1/drivers?session_key=latest", {
+      next: { revalidate: 60 },
+    });
     const openF1Data = await openF1Res.json();
     if (Array.isArray(openF1Data)) {
       openF1Data.forEach((d: any) => {
@@ -79,12 +81,12 @@ export default async function Standings() {
   });
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4">
+    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 md:px-8">
       {/* HEADER */}
-      <div className="flex items-center gap-4 mb-8">
-        <div className="h-8 w-1 bg-red-600" />
-        <h2 className="text-3xl font-black italic uppercase text-white tracking-tighter">
-          Season <span className="text-red-600">Standings</span>
+      <div className="flex items-center gap-3 mb-6 border-b border-zinc-800/80 pb-4">
+        <div className="h-7 w-1 bg-red-600 rounded-full" />
+        <h2 className="text-2xl sm:text-3xl font-black italic uppercase text-white tracking-tighter">
+          World <span className="text-red-600">Standings</span>
         </h2>
       </div>
       <StandingsClient

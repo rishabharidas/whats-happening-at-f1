@@ -1,4 +1,5 @@
 import React from "react";
+import TeamLogo from "@/components/TeamLogo";
 import { PracticeResultRow } from "@/utils/sessionResults";
 
 export default function PracticeClassification({
@@ -22,7 +23,7 @@ export default function PracticeClassification({
   const top3 = results.slice(0, 3);
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-10 w-full max-w-full overflow-x-hidden">
       {/* ── SESSION LEADER HERO ── */}
       {leader && (
         <div className="relative overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/40">
@@ -53,9 +54,14 @@ export default function PracticeClassification({
                 </span>
               </h2>
 
-              <p className="text-zinc-400 font-mono text-sm mt-3 uppercase tracking-widest">
-                {leader.teamName}
-              </p>
+              <div className="flex items-center gap-2 mt-3">
+                <span className="w-5 h-5 rounded-full bg-zinc-950/80 border border-white/10 flex items-center justify-center p-0.5 shadow-sm">
+                  <TeamLogo teamName={leader.teamName} size={14} className="w-3.5 h-3.5 object-contain" />
+                </span>
+                <p className="text-zinc-400 font-mono text-sm uppercase tracking-widest">
+                  {leader.teamName}
+                </p>
+              </div>
 
               <div className="flex flex-wrap items-center gap-8 mt-6">
                 <div>
@@ -120,9 +126,14 @@ export default function PracticeClassification({
                   style={{ backgroundColor: d.teamColor }}
                 />
                 <div>
-                  <span className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-widest">
-                    P{d.position} • {d.teamName}
-                  </span>
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <span className="w-4 h-4 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center p-0.5 flex-shrink-0">
+                      <TeamLogo teamName={d.teamName} size={11} className="w-2.5 h-2.5 object-contain" />
+                    </span>
+                    <span className="text-[10px] font-mono text-zinc-400 font-bold uppercase tracking-widest truncate">
+                      P{d.position} • {d.teamName}
+                    </span>
+                  </div>
                   <h4 className="text-base font-black italic text-white uppercase tracking-tight">
                     {d.driverName}
                   </h4>
@@ -205,13 +216,26 @@ export default function PracticeClassification({
                           <span className="text-[10px] font-mono text-zinc-500 uppercase">
                             #{row.driverNumber} {row.driverCode ? `• ${row.driverCode}` : ""}
                           </span>
+                          <div className="flex md:hidden items-center gap-1.5 mt-0.5">
+                            <span className="w-3.5 h-3.5 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center p-0.5 flex-shrink-0">
+                              <TeamLogo teamName={row.teamName} size={10} className="w-2.5 h-2.5 object-contain" />
+                            </span>
+                            <span className="text-[10px] font-mono text-zinc-500 uppercase truncate">
+                              {row.teamName}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">
-                      <span className="text-zinc-400 text-xs font-mono">
-                        {row.teamName}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center bg-zinc-900 border border-white/10 p-0.5">
+                          <TeamLogo teamName={row.teamName} size={12} className="w-3 h-3 object-contain" />
+                        </div>
+                        <span className="text-zinc-400 text-xs font-mono truncate">
+                          {row.teamName}
+                        </span>
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       <span

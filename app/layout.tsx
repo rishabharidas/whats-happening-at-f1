@@ -29,11 +29,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased max-w-full overflow-x-hidden`}
     >
-      <body className="min-h-full flex flex-col relative">
+      <body className="min-h-full w-full max-w-full overflow-x-hidden flex flex-col relative bg-[#0a0a0a] text-zinc-100 selection:bg-red-600 selection:text-white">
         <NavigationBar />
-        <div className="mt-16 px-0 md:px-16 w-full">{children}</div>
+        <div className="pt-24 sm:pt-28 md:pt-32 w-full max-w-full overflow-x-hidden flex-1">{children}</div>
         <Footer />
       </body>
     </html>

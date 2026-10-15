@@ -88,12 +88,12 @@ export default async function RaceResultPage({
     : "";
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white font-sans">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#0a0a0a] text-white font-sans">
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-red-600/5 blur-[180px] rounded-full" />
       </div>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4 md:px-8 py-20">
+      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-12 sm:py-20">
         {/* HEADER */}
         <div className="mb-10">
           <Link

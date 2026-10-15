@@ -219,7 +219,7 @@ export async function getWeekendSessions(round: string) {
     try {
       const [sessionsRes, driversRes] = await Promise.all([
         fetch(`https://api.openf1.org/v1/sessions?meeting_key=${openF1MeetingKey}`, {
-          next: { revalidate: 600 },
+          next: { revalidate: 60 },
         }),
         fetch(`https://api.openf1.org/v1/drivers?meeting_key=${openF1MeetingKey}`, {
           next: { revalidate: 3600 },
@@ -364,7 +364,7 @@ export async function getWeekendSessions(round: string) {
       if (!sessionObj.isCompleted || type === "practice") {
         try {
           const res = await fetch(`https://api.openf1.org/v1/session_result?session_key=${sKey}`, {
-            next: { revalidate: 300 },
+            next: { revalidate: 60 },
           });
           if (res.ok) {
             const rawData = await res.json();

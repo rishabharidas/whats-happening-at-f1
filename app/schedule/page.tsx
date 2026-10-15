@@ -97,8 +97,11 @@ async function ScheduleContent() {
     const raceDate = new Date(`${race.date}T${race.time}`);
     const firstSession = sessions[0] ? new Date(sessions[0].dateStr) : null;
 
+    const raceStartTime = raceDate.getTime();
+    const raceEndTime = raceStartTime + (2 * 60 * 60 * 1000); // 2h race window
+
     let status: "past" | "active" | "upcoming" = "upcoming";
-    if (raceDate < now) {
+    if (now.getTime() > raceEndTime) {
       status = "past";
     } else if (firstSession && firstSession <= now) {
       status = "active";

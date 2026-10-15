@@ -1,5 +1,6 @@
 import api from "@/utils/api";
 import UpcomingSessionClient from "./UpcomingSessionClient";
+import { checkSessionTiming } from "@/utils/sessionTiming";
 
 export default async function UpcomingSession() {
   const { get } = api();
@@ -65,17 +66,24 @@ export default async function UpcomingSession() {
       new Date(a.date_start).getTime() - new Date(b.date_start).getTime(),
   );
 
-  const today = new Date().toISOString();
-  const upcomingSessions = allSessions.filter(
-    (session: any) => session.date_start > today,
-  );
+  const now = new Date();
+  const activeAndUpcomingSessions = allSessions.filter((session: any) => {
+    const timing = checkSessionTiming(session.date_start, session.session_name, now);
+    return timing.isOngoing || timing.isUpcoming;
+  });
 
   // The Big Feature Session
-  const mainSession = upcomingSessions[0];
+  const rawMainSession = activeAndUpcomingSessions[0];
   // The next 3 sessions
-  const secondarySessions = upcomingSessions.slice(1, 4);
+  const secondarySessions = activeAndUpcomingSessions.slice(1, 4);
 
-  if (!mainSession) return null;
+  if (!rawMainSession) return null;
+
+  const mainTiming = checkSessionTiming(rawMainSession.date_start, rawMainSession.session_name, now);
+  const mainSession = {
+    ...rawMainSession,
+    isOngoing: mainTiming.isOngoing,
+  };
 
   // Attempt to fetch circuit image from OpenF1
   let circuit_image = "";

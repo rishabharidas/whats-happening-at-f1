@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
+import TeamLogo from "@/components/TeamLogo";
+import { checkSessionTiming } from "@/utils/sessionTiming";
 
 type SessionInfo = { name: string; dateStr: string };
 type RaceInfo = {
@@ -53,66 +55,73 @@ function RaceCard({
   isHighlighted,
   mounted,
   globalNextSessionDateStr,
+  now,
 }: {
   race: RaceInfo;
   isHighlighted: boolean;
   mounted: boolean;
   globalNextSessionDateStr: string | null;
+  now: Date;
 }) {
-  const [expanded, setExpanded] = useState(isHighlighted);
+  const ongoingSession = race.sessions.find((s) => checkSessionTiming(s.dateStr, s.name, now).isOngoing);
+  const [expanded, setExpanded] = useState(isHighlighted || !!ongoingSession);
   const cardRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to highlighted card on mount
   useEffect(() => {
-    if (isHighlighted && cardRef.current) {
+    if ((isHighlighted || ongoingSession) && cardRef.current) {
       setTimeout(() => {
         cardRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       }, 400);
     }
-  }, [isHighlighted]);
+  }, [isHighlighted, ongoingSession]);
 
   const raceDate = formatDate(race.raceDate, mounted);
   const isPast = race.status === "past";
-  const isActive = race.status === "active";
+  const isActive = race.status === "active" || !!ongoingSession;
 
-  const now = new Date();
-  const nextSession = race.sessions.find((s) => new Date(s.dateStr) > now);
+  const nextSession = race.sessions.find((s) => checkSessionTiming(s.dateStr, s.name, now).isUpcoming);
   const isCurrentWeekend = isActive || (isHighlighted && !isPast);
 
   const cardHeaderInner = (
-    <div className="flex items-stretch">
+    <div className="flex items-stretch min-w-0">
           {/* Round number / date column */}
           <div
-            className={`flex flex-col items-center justify-center px-5 py-5 min-w-[80px] border-r
+            className={`flex flex-col items-center justify-center px-3 sm:px-5 py-4 sm:py-5 min-w-[65px] sm:min-w-[80px] border-r flex-shrink-0
               ${isPast ? "border-zinc-800/30 bg-zinc-900/20" : ""}
-              ${isActive ? "border-red-600/30 bg-red-600/10" : ""}
+              ${ongoingSession ? "border-red-500/50 bg-red-600/20" : isActive ? "border-red-600/30 bg-red-600/10" : ""}
               ${!isPast && !isActive ? "border-zinc-800/50 bg-zinc-900/30" : ""}
             `}
           >
             <span className={`text-[10px] font-black uppercase tracking-widest font-mono
-              ${isPast ? "text-zinc-600" : isActive ? "text-red-500" : "text-zinc-500"}`}>
+              ${isPast ? "text-zinc-600" : ongoingSession ? "text-red-400 font-bold" : isActive ? "text-red-500" : "text-zinc-500"}`}>
               R{race.round}
             </span>
-            <span className={`text-3xl font-black italic leading-none my-1
+            <span className={`text-2xl sm:text-3xl font-black italic leading-none my-1
               ${isPast ? "text-zinc-650" : "text-white"}`}>
               {raceDate.day}
             </span>
             <span className={`text-[10px] font-bold uppercase tracking-wide
-              ${isPast ? "text-zinc-600" : isActive ? "text-red-400" : "text-zinc-400"}`}>
+              ${isPast ? "text-zinc-600" : ongoingSession ? "text-red-400" : isActive ? "text-red-400" : "text-zinc-400"}`}>
               {raceDate.month}
             </span>
           </div>
 
           {/* Race info */}
-          <div className="flex-1 px-6 py-5 flex items-center gap-4 min-w-0">
+          <div className="flex-1 px-3 sm:px-6 py-4 sm:py-5 flex items-center gap-2 sm:gap-4 min-w-0">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 mb-1">
-                {isActive && (
-                  <span className="px-2 py-0.5 text-[9px] font-black uppercase bg-red-600 text-white rounded tracking-widest animate-pulse">
+                {ongoingSession ? (
+                  <span className="px-2.5 py-0.5 text-[9px] font-black uppercase bg-red-600 text-white rounded tracking-widest flex items-center gap-1.5 shadow-lg shadow-red-600/30 animate-pulse">
+                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                    LIVE NOW: {ongoingSession.name}
+                  </span>
+                ) : isActive ? (
+                  <span className="px-2 py-0.5 text-[9px] font-black uppercase bg-red-600 text-white rounded tracking-widest">
                     Active Weekend
                   </span>
-                )}
-                {isCurrentWeekend && !isActive && (
+                ) : null}
+                {isCurrentWeekend && !isActive && !ongoingSession && (
                   <span className="px-2 py-0.5 text-[9px] font-black uppercase bg-zinc-800 text-zinc-300 rounded tracking-widest">
                     Up Next
                   </span>
@@ -126,16 +135,26 @@ function RaceCard({
                 ${isPast ? "text-zinc-600" : "text-zinc-400"}`}>
                 {race.circuitName} • {race.locality}, {race.country}
               </p>
-              {!isPast && nextSession && (
+              {ongoingSession ? (
+                <p className="text-[10px] text-red-400 font-bold uppercase tracking-widest mt-1 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+                  Session in progress: {ongoingSession.name}
+                </p>
+              ) : !isPast && nextSession ? (
                 <p className="text-[10px] text-red-400 font-bold uppercase tracking-widest mt-1">
                   Next: {nextSession.name} — {formatDate(nextSession.dateStr, mounted).full} {formatDate(nextSession.dateStr, mounted).time}
                 </p>
-              )}
+              ) : null}
               {isPast && race.winner && (
                 <div className="flex md:hidden items-center gap-2 mt-2 flex-wrap">
-                  <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest font-mono">Winner</span>
-                  <span className="text-xs font-black text-zinc-400 italic">{race.winner.name}</span>
-                  <span className="text-[9px] font-medium text-zinc-600 font-mono">({race.winner.team})</span>
+                  <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest font-mono">Winner</span>
+                  <span className="text-xs font-black text-zinc-300 italic">{race.winner.name}</span>
+                  <div className="flex items-center gap-1">
+                    <span className="w-3.5 h-3.5 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center p-0.5 flex-shrink-0">
+                      <TeamLogo teamName={race.winner.team} size={10} className="w-2.5 h-2.5 object-contain" />
+                    </span>
+                    <span className="text-[9px] font-medium text-zinc-400 font-mono">{race.winner.team}</span>
+                  </div>
                 </div>
               )}
             </div>
@@ -143,10 +162,15 @@ function RaceCard({
             {/* Winner chip for past races (Desktop) */}
             {isPast && race.winner && (
               <div className="hidden md:flex items-center gap-2 flex-shrink-0">
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-850">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-800">
                   <span className="text-[9px] font-black text-red-500 uppercase tracking-widest font-mono">Winner</span>
                   <span className="text-xs font-black text-white italic">{race.winner.name}</span>
-                  <span className="text-[10px] text-zinc-500 font-mono">({race.winner.team})</span>
+                  <div className="flex items-center gap-1.5 pl-1.5 border-l border-white/10">
+                    <span className="w-4 h-4 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center p-0.5 flex-shrink-0">
+                      <TeamLogo teamName={race.winner.team} size={11} className="w-2.5 h-2.5 object-contain" />
+                    </span>
+                    <span className="text-[10px] text-zinc-400 font-mono">{race.winner.team}</span>
+                  </div>
                 </div>
               </div>
             )}
@@ -256,44 +280,63 @@ function RaceCard({
           <div className={`${isPast ? "mt-3" : ""} border-t pt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3
             ${isPast ? "border-zinc-800/30" : "border-zinc-800/60"}`}>
             {race.sessions.map((session, idx) => {
+              const timing = checkSessionTiming(session.dateStr, session.name, now);
               const sDate = formatDate(session.dateStr, mounted);
-              const sessionDt = new Date(session.dateStr);
-              const sessionPast = sessionDt < now;
-              const isNextUp = globalNextSessionDateStr === session.dateStr;
+              const isOngoing = timing.isOngoing;
+              const sessionPast = timing.isPast;
+              const isNextUp = !isOngoing && !sessionPast && globalNextSessionDateStr === session.dateStr;
 
               return (
                 <div
                   key={idx}
                   className={`relative flex items-center gap-3 px-4 py-3 rounded-xl border transition-all
-                    ${sessionPast ? "border-zinc-800/30 bg-zinc-900/20 opacity-70 hover:opacity-100 hover:border-zinc-700" : ""}
-                    ${isNextUp ? "border-red-600/50 bg-red-600/5" : ""}
-                    ${!sessionPast && !isNextUp ? "border-zinc-800/50 bg-zinc-900/30 hover:border-zinc-700" : ""}
+                    ${isOngoing ? "border-red-500 bg-red-950/40 shadow-lg shadow-red-600/20 ring-1 ring-red-500/50" : ""}
+                    ${sessionPast && !isOngoing ? "border-zinc-800/30 bg-zinc-900/20 opacity-70 hover:opacity-100 hover:border-zinc-700" : ""}
+                    ${isNextUp && !isOngoing ? "border-red-600/50 bg-red-600/5" : ""}
+                    ${!sessionPast && !isNextUp && !isOngoing ? "border-zinc-800/50 bg-zinc-900/30 hover:border-zinc-700" : ""}
                   `}
                 >
-                  {isNextUp && (
+                  {isOngoing && (
+                    <span className="absolute -top-2 right-2 px-2 py-0.5 text-[8px] font-black uppercase bg-red-600 text-white rounded tracking-widest flex items-center gap-1 shadow-md shadow-red-600/50 animate-pulse">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                      ONGOING
+                    </span>
+                  )}
+                  {isNextUp && !isOngoing && (
                     <span className="absolute -top-1.5 -right-1 px-1.5 py-0.5 text-[8px] font-black uppercase bg-red-600 text-white rounded tracking-widest">
                       up next
                     </span>
                   )}
                   <div className={`flex flex-col items-center justify-center border-r pr-3 min-w-[50px]
-                    ${sessionPast ? "border-zinc-800/30" : "border-zinc-800/60"}`}>
-                    <span className={`text-[10px] font-bold uppercase ${sessionPast ? "text-zinc-600" : "text-zinc-500"}`}>
+                    ${isOngoing ? "border-red-500/30" : sessionPast ? "border-zinc-800/30" : "border-zinc-800/60"}`}>
+                    <span className={`text-[10px] font-bold uppercase ${isOngoing ? "text-red-400" : sessionPast ? "text-zinc-600" : "text-zinc-500"}`}>
                       {sDate.weekday}
                     </span>
-                    <span className={`text-xl font-black italic leading-none ${sessionPast ? "text-zinc-500" : "text-white"}`}>
+                    <span className={`text-xl font-black italic leading-none ${isOngoing ? "text-red-200" : sessionPast ? "text-zinc-500" : "text-white"}`}>
                       {sDate.day}
                     </span>
                   </div>
                   <div className="flex flex-col min-w-0">
                     <span className={`text-xs font-black uppercase tracking-tight truncate
-                      ${sessionPast ? "text-zinc-400" : isNextUp ? "text-red-400" : "text-zinc-300"}`}>
+                      ${isOngoing ? "text-white" : sessionPast ? "text-zinc-400" : isNextUp ? "text-red-400" : "text-zinc-300"}`}>
                       {session.name}
                     </span>
-                    <span className={`text-xs font-mono ${sessionPast ? "text-zinc-600" : "text-zinc-500"}`}>
+                    <span className={`text-xs font-mono ${isOngoing ? "text-red-300 font-bold" : sessionPast ? "text-zinc-600" : "text-zinc-500"}`}>
                       {sDate.time}
                     </span>
                   </div>
-                  {sessionPast && (
+                  {isOngoing ? (
+                    <Link
+                      href={`/race/${race.round}?session=${getSessionSlug(session.name)}`}
+                      className="ml-auto inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-white bg-red-600 hover:bg-red-500 px-2.5 py-1.5 rounded-md transition-all flex-shrink-0 shadow-md shadow-red-600/30 animate-pulse"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Live
+                      <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                      </svg>
+                    </Link>
+                  ) : sessionPast ? (
                     <Link
                       href={`/race/${race.round}?session=${getSessionSlug(session.name)}`}
                       className="ml-auto inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-red-400 hover:text-white bg-red-600/10 hover:bg-red-600 px-2 py-1 rounded-md transition-all flex-shrink-0"
@@ -304,7 +347,7 @@ function RaceCard({
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                       </svg>
                     </Link>
-                  )}
+                  ) : null}
                 </div>
               );
             })}
@@ -324,28 +367,31 @@ export default function ScheduleClient({
 }) {
   const [mounted, setMounted] = useState(false);
   const [filter, setFilter] = useState<"all" | "upcoming" | "past">("all");
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+    const interval = setInterval(() => setNow(new Date()), 15000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Compute the single globally next session across all races
-  const now = new Date();
   let globalNextSessionDateStr: string | null = null;
   for (const race of races) {
     for (const session of race.sessions) {
-      if (new Date(session.dateStr) > now) {
+      const timing = checkSessionTiming(session.dateStr, session.name, now);
+      if (timing.isUpcoming) {
         if (
           !globalNextSessionDateStr ||
           new Date(session.dateStr) < new Date(globalNextSessionDateStr)
         ) {
           globalNextSessionDateStr = session.dateStr;
         }
-        break; // sessions are already sorted, so first future one per race is enough
+        break;
       }
     }
   }
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
-  }, []);
 
   const filtered = races.filter((r) => {
     if (filter === "upcoming") return r.status !== "past";
@@ -354,31 +400,33 @@ export default function ScheduleClient({
   });
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 w-full max-w-full overflow-x-hidden">
       {/* Filter pills */}
-      <div className="flex items-center gap-3">
-        {(["all", "upcoming", "past"] as const).map((f) => (
-          <button
-            key={f}
-            id={`schedule-filter-${f}`}
-            onClick={() => setFilter(f)}
-            className={`px-4 py-1.5 text-xs font-black uppercase italic tracking-widest rounded-full border transition-all cursor-pointer
-              ${filter === f
-                ? "bg-red-600 border-red-600 text-white"
-                : "bg-transparent border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300"
+      <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-between">
+        <div className="flex items-center gap-2">
+          {(["all", "upcoming", "past"] as const).map((f) => (
+            <button
+              key={f}
+              id={`schedule-filter-${f}`}
+              onClick={() => setFilter(f)}
+              className={`px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-black uppercase italic tracking-widest rounded-full border transition-all cursor-pointer ${
+                filter === f
+                  ? "bg-red-600 border-red-600 text-white"
+                  : "bg-transparent border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300"
               }`}
-          >
-            {f}
-          </button>
-        ))}
-        <span className="ml-auto text-zinc-600 font-mono text-xs">
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+        <span className="text-zinc-600 font-mono text-xs">
           {filtered.length} / {races.length} races
         </span>
       </div>
 
       {/* Race cards */}
       <div className="flex flex-col gap-4">
-        {filtered.map((race, idx) => {
+        {filtered.map((race) => {
           const originalIdx = races.indexOf(race);
           return (
             <RaceCard
@@ -387,6 +435,7 @@ export default function ScheduleClient({
               isHighlighted={originalIdx === highlightIndex}
               mounted={mounted}
               globalNextSessionDateStr={globalNextSessionDateStr}
+              now={now}
             />
           );
         })}

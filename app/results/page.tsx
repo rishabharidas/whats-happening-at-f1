@@ -92,7 +92,9 @@ async function ResultsContent() {
     const [racesRes, resultsRes, openF1Res] = await Promise.all([
       get("current.json"),
       get("current/results/1.json"),
-      fetch("https://api.openf1.org/v1/drivers?session_key=latest").catch(() => null),
+      fetch("https://api.openf1.org/v1/drivers?session_key=latest", {
+        next: { revalidate: 60 },
+      }).catch(() => null),
     ]);
 
     if (racesRes.ok) {

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import TeamLogo from "@/components/TeamLogo";
 
 type RaceInfo = {
   round: string;
@@ -102,12 +103,12 @@ export default function ResultsClient({ races }: { races: RaceInfo[] }) {
       {/* FILTERS & SEARCH ROW */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-zinc-800 pb-6">
         {/* Filter Pills */}
-        <div className="flex bg-zinc-950 p-1 rounded-full border border-zinc-800/80 w-full md:w-auto">
+        <div className="grid grid-cols-3 sm:flex bg-zinc-950 p-1 rounded-full border border-zinc-800/80 w-full md:w-auto">
           {(["all", "finished", "upcoming"] as const).map((type) => (
             <button
               key={type}
               onClick={() => setFilter(type)}
-              className={`px-6 py-2 text-xs font-black uppercase italic tracking-wider transition-all rounded-full ${
+              className={`px-2 sm:px-6 py-2 text-[10px] sm:text-xs font-black uppercase italic tracking-wider text-center transition-all rounded-full ${
                 filter === type
                   ? "bg-red-600 text-white shadow-lg shadow-red-600/20"
                   : "text-zinc-400 hover:text-white"
@@ -221,12 +222,17 @@ export default function ResultsClient({ races }: { races: RaceInfo[] }) {
                           <span className="text-base font-black italic text-white leading-tight block truncate">
                             {race.winner.name}
                           </span>
-                          <span
-                            className="text-xs font-mono font-bold uppercase tracking-wider block mt-0.5 truncate"
-                            style={{ color: borderAccentColor }}
-                          >
-                            {race.winner.team}
-                          </span>
+                          <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
+                            <span className="w-3.5 h-3.5 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center p-0.5 flex-shrink-0">
+                              <TeamLogo teamName={race.winner.team} size={11} className="w-2.5 h-2.5 object-contain" />
+                            </span>
+                            <span
+                              className="text-xs font-mono font-bold uppercase tracking-wider truncate"
+                              style={{ color: borderAccentColor }}
+                            >
+                              {race.winner.team}
+                            </span>
+                          </div>
                         </div>
                       </div>
 

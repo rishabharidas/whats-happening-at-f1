@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Podium from "@/components/Podium";
+import TeamLogo from "@/components/TeamLogo";
 import PracticeClassification from "./PracticeClassification";
 import QualifyingClassification from "./QualifyingClassification";
 import SprintClassification from "./SprintClassification";
@@ -149,9 +150,14 @@ export default function SessionTabs({
                   {winner.Driver?.familyName}
                 </span>
               </h2>
-              <p className="text-zinc-400 font-mono text-sm mt-3 uppercase tracking-widest">
-                {winner.Constructor?.name}
-              </p>
+              <div className="flex items-center gap-2 mt-3">
+                <div className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center bg-zinc-900 border border-white/10 p-0.5 shadow-sm">
+                  <TeamLogo teamName={winner.Constructor?.name || ""} size={14} className="w-3.5 h-3.5 object-contain" />
+                </div>
+                <p className="text-zinc-400 font-mono text-sm uppercase tracking-widest">
+                  {winner.Constructor?.name}
+                </p>
+              </div>
               <div className="flex flex-wrap items-center gap-6 mt-6">
                 {[
                   { label: "Time", value: winner.Time?.time || "—" },
@@ -214,7 +220,9 @@ export default function SessionTabs({
                 team_name: teamName,
                 team_colour: TEAM_COLORS[teamName.toLowerCase()] || "333333",
                 headshot_url: headshotUrl,
-                time: result.Time?.time || "",
+                time: result.Time?.time || (parseInt(result.position, 10) === 1 ? "Winner" : undefined),
+                points: result.points,
+                driver_number: driverNumber,
               };
             });
 
@@ -303,7 +311,7 @@ export default function SessionTabs({
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-zinc-800 bg-zinc-900/60">
-                  {["Pos", "Driver", "Constructor", "Grid", "Laps", "Time / Status", "Pts"].map(
+                  {["Pos", "Driver", "Constructor", "Grid", "Laps", "Time / Gap", "Interval", "Pts"].map(
                     (h, i) => (
                       <th
                         key={h}
@@ -311,6 +319,7 @@ export default function SessionTabs({
                           ${i === 2 ? "hidden md:table-cell" : ""}
                           ${i === 3 ? "hidden sm:table-cell" : ""}
                           ${i === 4 ? "hidden lg:table-cell" : ""}
+                          ${i === 6 ? "hidden sm:table-cell" : ""}
                         `}
                       >
                         {h}
@@ -326,11 +335,51 @@ export default function SessionTabs({
                   }`;
                   const isP1 = result.position === "1";
                   const finished =
-                    result.status === "Finished" || result.status.startsWith("+");
+                    result.status === "Finished" || result.status?.startsWith("+") || result.status === "Lapped";
                   const hasFastestLap = result.FastestLap?.rank === "1";
                   const fullName = `${result.Driver?.givenName} ${result.Driver?.familyName}`;
                   const qualiPos = qualiPositions[fullName];
                   const posDiff = qualiPos ? qualiPos - parseInt(result.position, 10) : null;
+
+                  // 1. Race Completed Time (Winner) or Gap to Leader
+                  let timeOrGapDisplay = "";
+                  if (isP1) {
+                    timeOrGapDisplay = result.Time?.time || "Winner";
+                  } else if (result.Time?.time) {
+                    const clean = result.Time.time.replace(/s$/i, "");
+                    timeOrGapDisplay = clean.startsWith("+") ? `${clean}s` : `+${clean}s`;
+                  } else if (result.status?.startsWith("+")) {
+                    timeOrGapDisplay = result.status;
+                  } else if (result.status === "Lapped") {
+                    const lapDiff = results[0]?.laps
+                      ? parseInt(results[0].laps, 10) - parseInt(result.laps || "0", 10)
+                      : 1;
+                    timeOrGapDisplay = `+${lapDiff} Lap${lapDiff > 1 ? "s" : ""}`;
+                  } else {
+                    timeOrGapDisplay = statusLabel(result.status);
+                  }
+
+                  // 2. Interval Between Each Consecutive Racer
+                  let intervalDisplay = "—";
+                  if (isP1) {
+                    intervalDisplay = "LEADER";
+                  } else if (finished) {
+                    const prev = results[i - 1];
+                    if (result.Time?.millis && prev?.Time?.millis) {
+                      const curMs = parseInt(result.Time.millis, 10);
+                      const prevMs = parseInt(prev.Time.millis, 10);
+                      const diffMs = curMs - prevMs;
+                      if (!isNaN(diffMs) && diffMs >= 0) {
+                        intervalDisplay = `+${(diffMs / 1000).toFixed(3)}s`;
+                      }
+                    } else if (i === 1 && result.Time?.time) {
+                      const clean = result.Time.time.replace(/s$/i, "");
+                      intervalDisplay = clean.startsWith("+") ? `${clean}s` : `+${clean}s`;
+                    } else if (result.laps && prev?.laps && result.laps !== prev.laps) {
+                      const lapDiff = parseInt(prev.laps, 10) - parseInt(result.laps, 10);
+                      intervalDisplay = `+${lapDiff} Lap${lapDiff > 1 ? "s" : ""}`;
+                    }
+                  }
 
                   return (
                     <tr
@@ -343,7 +392,7 @@ export default function SessionTabs({
                       <td className="px-4 py-3">
                         <span
                           className={`font-black italic text-base ${
-                            isP1 ? "text-white" : "text-zinc-400"
+                            isP1 ? "text-amber-400" : "text-zinc-400"
                           }`}
                         >
                           {result.position}
@@ -375,9 +424,14 @@ export default function SessionTabs({
                         </div>
                       </td>
                       <td className="px-4 py-3 hidden md:table-cell">
-                        <span className="text-zinc-500 text-xs font-mono">
-                          {result.Constructor?.name}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center bg-zinc-900 border border-white/10 p-0.5">
+                            <TeamLogo teamName={result.Constructor?.name || ""} size={12} className="w-3 h-3 object-contain" />
+                          </div>
+                          <span className="text-zinc-400 text-xs font-mono truncate">
+                            {result.Constructor?.name}
+                          </span>
+                        </div>
                       </td>
                       <td className="px-4 py-3 hidden sm:table-cell">
                         <div className="flex items-center gap-1">
@@ -401,10 +455,37 @@ export default function SessionTabs({
                         </span>
                       </td>
                       <td className="px-4 py-3">
+                        <div className="flex flex-col">
+                          <span
+                            className={`text-xs font-mono font-bold ${
+                              isP1
+                                ? "text-amber-400 font-black"
+                                : finished
+                                  ? "text-zinc-200"
+                                  : statusColor(result.status)
+                            }`}
+                          >
+                            {timeOrGapDisplay}
+                          </span>
+                          {/* Show small interval tag on mobile when interval column is hidden */}
+                          {intervalDisplay !== "—" && !isP1 && (
+                            <span className="sm:hidden text-[9px] font-mono text-zinc-500">
+                              Int: {intervalDisplay}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 hidden sm:table-cell">
                         <span
-                          className={`text-xs font-mono ${statusColor(result.status)}`}
+                          className={`text-xs font-mono ${
+                            isP1
+                              ? "text-zinc-500 font-bold"
+                              : intervalDisplay !== "—"
+                                ? "text-zinc-400 font-semibold"
+                                : "text-zinc-600"
+                          }`}
                         >
-                          {statusLabel(result.status)}
+                          {intervalDisplay}
                         </span>
                       </td>
                       <td className="px-4 py-3">
@@ -472,7 +553,7 @@ export default function SessionTabs({
   };
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8 w-full max-w-full overflow-x-hidden">
       {/* ── SESSION SELECTION TABS ── */}
       <div className="border-b border-zinc-800/80 pb-3">
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">

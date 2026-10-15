@@ -33,12 +33,12 @@ export default async function LatestNews() {
   if (articles.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-8 w-full max-w-5xl mx-auto px-4 py-2">
+    <div className="flex flex-col gap-6 w-full max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-2">
       {/* HEADER */}
-      <div className="flex items-end justify-between border-b border-zinc-800 pb-4">
-        <div className="flex items-center gap-4">
-          <div className="h-8 w-1 bg-red-600" />
-          <h2 className="text-3xl font-black italic uppercase text-white tracking-tighter">
+      <div className="flex items-end justify-between border-b border-zinc-800/80 pb-4">
+        <div className="flex items-center gap-3">
+          <div className="h-7 w-1 bg-red-600 rounded-full" />
+          <h2 className="text-2xl sm:text-3xl font-black italic uppercase text-white tracking-tighter">
             Paddock <span className="text-red-600">News</span>
           </h2>
         </div>

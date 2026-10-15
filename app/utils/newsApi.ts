@@ -43,58 +43,58 @@ function saveCache(cache: Record<string, CacheEntry>) {
 // Solid F1 Mock news articles to serve as a robust fallback
 const MOCK_NEWS_ARTICLES = {
   status: "ok",
-  totalResults: 0,
+  totalResults: 5,
   articles: [
-    // {
-    //     source: { name: "Formula 1" },
-    //     author: "Paddock Insider",
-    //     title: "Hamilton vs Verstappen: The Strategic Duel That Defined the GP",
-    //     description: "An in-depth analysis of the tire management and pit-stop strategies that decided the latest Formula 1 clash on track.",
-    //     url: "https://www.formula1.com",
-    //     urlToImage: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&q=80&w=800",
-    //     publishedAt: new Date(Date.now() - 3600000).toISOString(),
-    //     content: "The latest Grand Prix delivered one of the most intense tactical battles of the season. Under extreme temperatures, tires degraded faster than expected, forcing teams into splits..."
-    // },
-    // {
-    //     source: { name: "Autosport" },
-    //     author: "Rebecca Meade",
-    //     title: "Ferrari Teases Major Floor and Wing Upgrades for Upcoming European Leg",
-    //     description: "Team Principal reveals that CFD and wind-tunnel simulations show promising gains for the Scuderia's upcoming aerodynamic package.",
-    //     url: "https://www.autosport.com",
-    //     urlToImage: "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&q=80&w=800",
-    //     publishedAt: new Date(Date.now() - 14400000).toISOString(),
-    //     content: "Ferrari's technical team has been working around the clock to address high-speed balance issues. The new floor update, scheduled for debut next weekend, focuses on..."
-    // },
-    // {
-    //     source: { name: "Motorsport.com" },
-    //     author: "Jonathan Noble",
-    //     title: "How Mid-Field Teams Are Exploiting Alternative Setups to Outqualify Rivals",
-    //     description: "Exploring the suspension geometry tweaks and rake adjustments keeping smaller teams in the top ten fight.",
-    //     url: "https://www.motorsport.com",
-    //     urlToImage: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&q=80&w=800",
-    //     publishedAt: new Date(Date.now() - 28800000).toISOString(),
-    //     content: "With the grid tighter than ever, finding even half a tenth in qualifying makes the difference between starting P8 or P14. Engineers are turning to aggressive setups..."
-    // },
-    // {
-    //     source: { name: "ESPN F1" },
-    //     author: "Nate Saunders",
-    //     title: "Aston Martin Confirms Long-Term High-Tech Simulation Center Expansion",
-    //     description: "The Silverstone squad doubles down on infrastructure with a state-of-the-art simulator to accelerate in-season driver development.",
-    //     url: "https://www.espn.com/f1",
-    //     urlToImage: "https://images.unsplash.com/photo-1547949003-9792a18a2601?auto=format&fit=crop&q=80&w=800",
-    //     publishedAt: new Date(Date.now() - 43200000).toISOString(),
-    //     content: "Aston Martin is continuing its relentless push towards championship contention. The team has officially broken ground on the second phase of its campus expansion..."
-    // },
-    // {
-    //     source: { name: "The Race" },
-    //     author: "Mark Hughes",
-    //     title: "The Quiet Evolution Behind McLaren's Remarkable High-Speed Cornering Balance",
-    //     description: "Analysing how McLaren solved their drag problem while maintaining their legendary stability in fast sweepers.",
-    //     url: "https://the-race.com",
-    //     urlToImage: "https://images.unsplash.com/photo-1610969524113-bae462bb3882?auto=format&fit=crop&q=80&w=800",
-    //     publishedAt: new Date(Date.now() - 86400000).toISOString(),
-    //     content: "McLaren's turnaround over the last 18 months has been well documented, but the subtle aerodynamical refinements to their sidepod inlets show a team in supreme command..."
-    // }
+    {
+      source: { name: "Formula 1" },
+      author: "Paddock Insider",
+      title: "Hamilton vs Verstappen: The Strategic Duel That Defined the GP",
+      description: "An in-depth analysis of the tire management and pit-stop strategies that decided the latest Formula 1 clash on track.",
+      url: "https://www.formula1.com",
+      urlToImage: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&q=80&w=800",
+      publishedAt: new Date(Date.now() - 3600000).toISOString(),
+      content: "The latest Grand Prix delivered one of the most intense tactical battles of the season. Under extreme temperatures, tires degraded faster than expected, forcing teams into splits..."
+    },
+    {
+      source: { name: "Autosport" },
+      author: "Rebecca Meade",
+      title: "Ferrari Teases Major Floor and Wing Upgrades for Upcoming European Leg",
+      description: "Team Principal reveals that CFD and wind-tunnel simulations show promising gains for the Scuderia's upcoming aerodynamic package.",
+      url: "https://www.autosport.com",
+      urlToImage: "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&q=80&w=800",
+      publishedAt: new Date(Date.now() - 14400000).toISOString(),
+      content: "Ferrari's technical team has been working around the clock to address high-speed balance issues. The new floor update, scheduled for debut next weekend, focuses on..."
+    },
+    {
+      source: { name: "Motorsport.com" },
+      author: "Jonathan Noble",
+      title: "How Mid-Field Teams Are Exploiting Alternative Setups to Outqualify Rivals",
+      description: "Exploring the suspension geometry tweaks and rake adjustments keeping smaller teams in the top ten fight.",
+      url: "https://www.motorsport.com",
+      urlToImage: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&q=80&w=800",
+      publishedAt: new Date(Date.now() - 28800000).toISOString(),
+      content: "With the grid tighter than ever, finding even half a tenth in qualifying makes the difference between starting P8 or P14. Engineers are turning to aggressive setups..."
+    },
+    {
+      source: { name: "ESPN F1" },
+      author: "Nate Saunders",
+      title: "Aston Martin Confirms Long-Term High-Tech Simulation Center Expansion",
+      description: "The Silverstone squad doubles down on infrastructure with a state-of-the-art simulator to accelerate in-season driver development.",
+      url: "https://www.espn.com/f1",
+      urlToImage: "https://images.unsplash.com/photo-1547949003-9792a18a2601?auto=format&fit=crop&q=80&w=800",
+      publishedAt: new Date(Date.now() - 43200000).toISOString(),
+      content: "Aston Martin is continuing its relentless push towards championship contention. The team has officially broken ground on the second phase of its campus expansion..."
+    },
+    {
+      source: { name: "The Race" },
+      author: "Mark Hughes",
+      title: "The Quiet Evolution Behind McLaren's Remarkable High-Speed Cornering Balance",
+      description: "Analysing how McLaren solved their drag problem while maintaining their legendary stability in fast sweepers.",
+      url: "https://the-race.com",
+      urlToImage: "https://images.unsplash.com/photo-1610969524113-bae462bb3882?auto=format&fit=crop&q=80&w=800",
+      publishedAt: new Date(Date.now() - 86400000).toISOString(),
+      content: "McLaren's turnaround over the last 18 months has been well documented, but the subtle aerodynamical refinements to their sidepod inlets show a team in supreme command..."
+    }
   ],
 };
 

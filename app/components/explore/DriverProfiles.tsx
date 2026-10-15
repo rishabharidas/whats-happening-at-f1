@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import TeamLogo from "@/components/TeamLogo";
 
 interface DriverProfile {
   number: string;
@@ -109,7 +110,7 @@ export default function DriverProfiles() {
                 : DRIVERS.find((d) => d.team.toLowerCase().includes(team.toLowerCase()));
               if (firstMatch) setSelectedDriver(firstMatch);
             }}
-            className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider transition-all
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider transition-all
               ${
                 activeFilter === team
                   ? "bg-red-600 text-white"
@@ -117,7 +118,10 @@ export default function DriverProfiles() {
               }
             `}
           >
-            {team}
+            {team !== "All" && (
+              <TeamLogo teamName={team} size={13} className="w-3.5 h-3.5 object-contain" />
+            )}
+            <span>{team}</span>
           </button>
         ))}
       </div>
@@ -149,9 +153,14 @@ export default function DriverProfiles() {
                   <span className="font-bold text-white text-sm uppercase block truncate group-hover:text-red-500 transition-colors">
                     {driver.name}
                   </span>
-                  <span className="text-[10px] text-zinc-500 uppercase tracking-tight block truncate mt-0.5">
-                    {driver.team}
-                  </span>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="w-3.5 h-3.5 rounded-full bg-zinc-950 border border-white/10 flex items-center justify-center p-0.5 flex-shrink-0">
+                      <TeamLogo teamName={driver.team} size={10} className="w-2.5 h-2.5 object-contain" />
+                    </span>
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-tight block truncate">
+                      {driver.team}
+                    </span>
+                  </div>
                 </div>
               </button>
             ))}
@@ -167,9 +176,10 @@ export default function DriverProfiles() {
             {/* Header row */}
             <div className="flex items-start justify-between">
               <div>
-                <span className="px-2 py-0.5 text-[8px] font-black uppercase bg-zinc-850 border border-zinc-800 text-zinc-400 rounded tracking-wider">
-                  {selectedDriver.team}
-                </span>
+                <div className="flex items-center gap-1.5 px-2.5 py-1 text-[9px] font-black uppercase bg-zinc-900 border border-zinc-800 text-zinc-300 rounded-lg tracking-wider w-fit">
+                  <TeamLogo teamName={selectedDriver.team} size={12} className="w-3 h-3 object-contain" />
+                  <span>{selectedDriver.team}</span>
+                </div>
                 <h4 className="text-3xl font-black italic uppercase text-white tracking-tighter mt-1">
                   {selectedDriver.name}
                 </h4>

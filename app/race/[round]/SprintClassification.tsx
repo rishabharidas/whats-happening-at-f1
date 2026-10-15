@@ -1,4 +1,5 @@
 import React from "react";
+import TeamLogo from "@/components/TeamLogo";
 import { TEAM_COLORS } from "@/utils/sessionResults";
 
 export default function SprintClassification({
@@ -24,7 +25,7 @@ export default function SprintClassification({
   }`;
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-10 w-full max-w-full overflow-x-hidden">
       {/* ── SPRINT WINNER HERO ── */}
       {winner && (
         <div className="relative overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/40">
@@ -54,9 +55,14 @@ export default function SprintClassification({
                 </span>
               </h2>
 
-              <p className="text-zinc-400 font-mono text-sm mt-3 uppercase tracking-widest">
-                {winner.Constructor?.name}
-              </p>
+              <div className="flex items-center gap-2 mt-3">
+                <span className="w-5 h-5 rounded-full bg-zinc-950/80 border border-white/10 flex items-center justify-center p-0.5 shadow-sm">
+                  <TeamLogo teamName={winner.Constructor?.name || ""} size={14} className="w-3.5 h-3.5 object-contain" />
+                </span>
+                <p className="text-zinc-400 font-mono text-sm uppercase tracking-widest">
+                  {winner.Constructor?.name}
+                </p>
+              </div>
 
               <div className="flex flex-wrap items-center gap-8 mt-6">
                 <div>
@@ -102,7 +108,7 @@ export default function SprintClassification({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-zinc-800 bg-zinc-900/60">
-                {["Pos", "Driver", "Constructor", "Grid", "Laps", "Time / Status", "Pts"].map(
+                {["Pos", "Driver", "Constructor", "Grid", "Laps", "Time / Gap", "Interval", "Pts"].map(
                   (h, i) => (
                     <th
                       key={h}
@@ -110,6 +116,7 @@ export default function SprintClassification({
                         ${i === 2 ? "hidden md:table-cell" : ""}
                         ${i === 3 ? "hidden sm:table-cell" : ""}
                         ${i === 4 ? "hidden lg:table-cell" : ""}
+                        ${i === 6 ? "hidden sm:table-cell" : ""}
                       `}
                     >
                       {h}
@@ -125,6 +132,24 @@ export default function SprintClassification({
                 }`;
                 const isP1 = r.position === "1";
                 const isPoints = parseInt(r.points || "0", 10) > 0;
+                const finished = r.status === "Finished" || r.status?.startsWith("+");
+
+                // Calculate interval to car ahead
+                let intervalDisplay = "—";
+                if (isP1) {
+                  intervalDisplay = "LEADER";
+                } else if (finished) {
+                  const prev = results[i - 1];
+                  if (r.Time?.millis && prev?.Time?.millis) {
+                    const diffMs = parseInt(r.Time.millis, 10) - parseInt(prev.Time.millis, 10);
+                    if (!isNaN(diffMs) && diffMs >= 0) {
+                      intervalDisplay = `+${(diffMs / 1000).toFixed(3)}s`;
+                    }
+                  } else if (i === 1 && r.Time?.time) {
+                    const clean = r.Time.time.replace(/s$/i, "");
+                    intervalDisplay = clean.startsWith("+") ? `${clean}s` : `+${clean}s`;
+                  }
+                }
 
                 return (
                   <tr
@@ -135,7 +160,7 @@ export default function SprintClassification({
                   >
                     <td className="px-4 py-3">
                       <span
-                        className={`font-black italic text-base ${isP1 ? "text-white" : "text-zinc-400"}`}
+                        className={`font-black italic text-base ${isP1 ? "text-amber-400" : "text-zinc-400"}`}
                       >
                         {r.position}
                       </span>
@@ -155,13 +180,26 @@ export default function SprintClassification({
                               {r.Driver?.familyName}
                             </span>
                           </p>
+                          <div className="flex md:hidden items-center gap-1.5 mt-0.5">
+                            <span className="w-3.5 h-3.5 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center p-0.5 flex-shrink-0">
+                              <TeamLogo teamName={r.Constructor?.name || ""} size={10} className="w-2.5 h-2.5 object-contain" />
+                            </span>
+                            <span className="text-[10px] text-zinc-500 font-mono truncate">
+                              {r.Constructor?.name}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">
-                      <span className="text-zinc-500 text-xs font-mono">
-                        {r.Constructor?.name}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center bg-zinc-900 border border-white/10 p-0.5">
+                          <TeamLogo teamName={r.Constructor?.name || ""} size={12} className="w-3 h-3 object-contain" />
+                        </div>
+                        <span className="text-zinc-400 text-xs font-mono truncate">
+                          {r.Constructor?.name}
+                        </span>
+                      </div>
                     </td>
                     <td className="px-4 py-3 hidden sm:table-cell">
                       <span className="text-zinc-500 text-xs font-mono">
@@ -174,8 +212,36 @@ export default function SprintClassification({
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="text-xs font-mono text-zinc-300">
-                        {r.Time?.time || r.status}
+                      <div className="flex flex-col">
+                        <span
+                          className={`text-xs font-mono font-bold ${
+                            isP1
+                              ? "text-amber-400 font-black"
+                              : finished
+                                ? "text-zinc-200"
+                                : "text-zinc-500"
+                          }`}
+                        >
+                          {isP1 ? (r.Time?.time || "Winner") : (r.Time?.time ? (r.Time.time.startsWith("+") ? `${r.Time.time}s` : `+${r.Time.time}s`) : r.status)}
+                        </span>
+                        {intervalDisplay !== "—" && !isP1 && (
+                          <span className="sm:hidden text-[9px] font-mono text-zinc-500">
+                            Int: {intervalDisplay}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 hidden sm:table-cell">
+                      <span
+                        className={`text-xs font-mono ${
+                          isP1
+                            ? "text-zinc-500 font-bold"
+                            : intervalDisplay !== "—"
+                              ? "text-zinc-400 font-semibold"
+                              : "text-zinc-600"
+                        }`}
+                      >
+                        {intervalDisplay}
                       </span>
                     </td>
                     <td className="px-4 py-3">

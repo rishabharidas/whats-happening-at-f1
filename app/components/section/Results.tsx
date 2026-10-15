@@ -41,7 +41,9 @@ export default async function Results() {
   // Fetch headshots from OpenF1 (fast static endpoint)
   let driverImages: Record<number, string> = {};
   try {
-    const openF1Res = await fetch("https://api.openf1.org/v1/drivers?session_key=latest");
+    const openF1Res = await fetch("https://api.openf1.org/v1/drivers?session_key=latest", {
+      next: { revalidate: 60 },
+    });
     const openF1Data = await openF1Res.json();
     if (Array.isArray(openF1Data)) {
       openF1Data.forEach((d: any) => {
@@ -56,40 +58,70 @@ export default async function Results() {
     const driver = result.Driver;
     const constructor = result.Constructor;
     const teamName = constructor?.name || "";
+    const driverNum = parseInt(result.number, 10);
 
     return {
-      position: parseInt(result.position),
+      position: parseInt(result.position, 10),
       name_acronym: driver.code,
       full_name: `${driver.givenName} ${driver.familyName}`,
       team_name: teamName,
       team_colour: TEAM_COLORS[teamName.toLowerCase()] || "333333",
-      headshot_url: (driverImages[parseInt(result.number)] || "").replace(
+      headshot_url: (driverImages[driverNum] || "").replace(
         "1col",
         "4col"
       ),
+      time: result.Time?.time || (parseInt(result.position, 10) === 1 ? "Winner" : undefined),
+      points: result.points,
+      driver_number: result.number || driver.permanentNumber,
     };
   });
 
+  // Fetch top 3 championship standings for the integrated podium summary bar
+  let championshipStandings: any[] = [];
+  try {
+    const standingsRes = await get("current/driverStandings.json");
+    if (standingsRes.ok) {
+      const standingsData = await standingsRes.json();
+      const list =
+        standingsData?.MRData?.StandingsTable?.StandingsLists?.[0]?.DriverStandings || [];
+      championshipStandings = list.slice(0, 3).map((ds: any) => ({
+        position: parseInt(ds.position, 10),
+        name: ds.Driver.familyName,
+        full_name: `${ds.Driver.givenName} ${ds.Driver.familyName}`,
+        team: ds.Constructors?.[0]?.name || "",
+        team_colour: TEAM_COLORS[ds.Constructors?.[0]?.name?.toLowerCase() || ""] || "333333",
+        points: ds.points,
+      }));
+    }
+  } catch (e) {
+    console.error("Failed to fetch driver standings for podium summary", e);
+  }
+
+  const circuitLoc = race.Circuit?.Location
+    ? `${race.Circuit.Location.locality}, ${race.Circuit.Location.country}`
+    : race.Circuit?.circuitName || "";
+
   return (
-    <div className="flex flex-col gap-8 w-full max-w-5xl mx-auto px-4 py-2">
-      {/* HEADER */}
-      <div className="flex items-end justify-between border-b border-zinc-800 pb-4">
-        <div className="flex items-center gap-4">
-          <div className="h-8 w-1 bg-red-600" />
-          <h2 className="text-3xl font-black italic uppercase text-white tracking-tighter">
+    <div className="flex flex-col gap-6 w-full max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-2">
+      {/* CLEAN SECTION HEADER */}
+      <div className="flex items-end justify-between border-b border-zinc-800/80 pb-4">
+        <div className="flex items-center gap-3">
+          <div className="h-7 w-1 bg-red-600 rounded-full" />
+          <h2 className="text-2xl sm:text-3xl font-black italic uppercase text-white tracking-tighter">
             Latest <span className="text-red-600">Results</span>
           </h2>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="text-zinc-500 font-mono text-sm uppercase tracking-widest hidden md:block">
+          <span className="hidden sm:inline-block text-xs font-mono text-zinc-400 uppercase tracking-wider pl-2 border-l border-zinc-800">
             {sessionName}
           </span>
+        </div>
+
+        <div className="flex items-center gap-3">
           <Link
             href="/results"
             id="view-all-results"
-            className="group relative inline-flex items-center gap-2 px-4 py-2 text-xs font-black uppercase italic tracking-widest bg-zinc-900 border border-zinc-700 text-zinc-300 hover:border-red-600 hover:text-white transition-all rounded-full"
+            className="group relative inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-black uppercase italic tracking-widest bg-zinc-900 border border-zinc-700/80 text-zinc-300 hover:border-red-600 hover:text-white transition-all rounded-full shadow-md hover:shadow-red-900/20"
           >
-            <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
             </svg>
             <span>All Results</span>
@@ -103,7 +135,13 @@ export default async function Results() {
         </div>
       </div>
 
-      <Podium drivers={resultData} />
+      <Podium
+        drivers={resultData}
+        grandPrixName={sessionName}
+        circuitName={race.Circuit?.circuitName}
+        circuitLocation={circuitLoc}
+        championshipStandings={championshipStandings}
+      />
     </div>
   );
 }

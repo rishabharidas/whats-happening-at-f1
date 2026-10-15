@@ -44,7 +44,7 @@ export default function api() {
         try {
           const res = await fetch(target, {
             ...options,
-            next: { revalidate: 300 }, // 5 minutes cache
+            next: { revalidate: 60 }, // 1 minute cache
           });
 
           // If we get rate-limited, don't return early; loop back and retry

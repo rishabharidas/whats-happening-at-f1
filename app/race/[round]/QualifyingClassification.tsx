@@ -1,5 +1,6 @@
 import React from "react";
 import { QualifyingResultRow } from "@/utils/sessionResults";
+import TeamLogo from "@/components/TeamLogo";
 
 export default function QualifyingClassification({
   results,
@@ -25,7 +26,7 @@ export default function QualifyingClassification({
   const poleTime = poleSitter.q3 !== "—" ? poleSitter.q3 : poleSitter.q2 !== "—" ? poleSitter.q2 : poleSitter.q1;
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-10 w-full max-w-full overflow-x-hidden">
       {/* ── POLE SITTER HERO ── */}
       {poleSitter && (
         <div className="relative overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/40">
@@ -56,9 +57,14 @@ export default function QualifyingClassification({
                 </span>
               </h2>
 
-              <p className="text-zinc-400 font-mono text-sm mt-3 uppercase tracking-widest">
-                {poleSitter.teamName}
-              </p>
+              <div className="flex items-center gap-2 mt-3">
+                <div className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center bg-zinc-900 border border-white/10 p-0.5 shadow-sm">
+                  <TeamLogo teamName={poleSitter.teamName} size={14} className="w-3.5 h-3.5 object-contain" />
+                </div>
+                <p className="text-zinc-400 font-mono text-sm uppercase tracking-widest">
+                  {poleSitter.teamName}
+                </p>
+              </div>
 
               <div className="flex flex-wrap items-center gap-8 mt-6">
                 <div>
@@ -224,9 +230,14 @@ export default function QualifyingClassification({
                       </div>
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">
-                      <span className="text-zinc-400 text-xs font-mono">
-                        {row.teamName}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center bg-zinc-900 border border-white/10 p-0.5">
+                          <TeamLogo teamName={row.teamName} size={12} className="w-3 h-3 object-contain" />
+                        </div>
+                        <span className="text-zinc-400 text-xs font-mono">
+                          {row.teamName}
+                        </span>
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       <span className="text-xs font-mono text-zinc-400">

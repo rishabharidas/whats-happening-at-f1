@@ -95,20 +95,27 @@ export default function UpcomingSessionClient({
         {/* Session info */}
         <div className="flex-1 p-8 flex flex-col justify-center relative">
           <div className="relative z-10">
-            <span className="text-red-500 text-[10px] font-black uppercase tracking-[0.2em] mb-2 block">
-              Upcoming Session
-            </span>
+            {mainSession.isOngoing ? (
+              <span className="inline-flex items-center gap-2 px-3 py-1 bg-red-600 text-white rounded-md text-[10px] font-black uppercase tracking-[0.2em] mb-2 animate-pulse shadow-lg shadow-red-600/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                ONGOING SESSION • LIVE NOW
+              </span>
+            ) : (
+              <span className="text-red-500 text-[10px] font-black uppercase tracking-[0.2em] mb-2 block">
+                Upcoming Session
+              </span>
+            )}
             <h3 className="text-4xl font-black text-white uppercase italic tracking-tighter">
               {mainSession.session_name}
             </h3>
             <p className="text-zinc-400 font-medium mt-2 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-zinc-700 animate-pulse" />
+              <span className={`w-2 h-2 rounded-full ${mainSession.isOngoing ? "bg-red-500 animate-ping" : "bg-zinc-700 animate-pulse"}`} />
               {mainSession.location}
             </p>
           </div>
         </div>
 
-        {/* Circuit image with "UPNEXT" blended on top */}
+        {/* Circuit image with "UPNEXT" / "LIVE" blended on top */}
         {mainSession.circuit_image && (
           <div className="flex-1 flex items-center justify-center relative overflow-hidden border-l border-white/5 border-dashed min-h-[160px] md:min-h-0">
             {/* Actual circuit image */}
@@ -119,7 +126,7 @@ export default function UpcomingSessionClient({
               className="w-full max-w-[280px] h-auto object-contain opacity-60 drop-shadow-2xl filter contrast-125 relative z-10 p-8"
             />
 
-            {/* "UPNEXT" text — bottom-right, visible */}
+            {/* Watermark text — bottom-right */}
             <div
               className="absolute bottom-4 right-5 pointer-events-none z-20 select-none"
               aria-hidden="true"
@@ -129,7 +136,9 @@ export default function UpcomingSessionClient({
                 style={{
                   letterSpacing: "-0.04em",
                   paddingRight: "0.1em",
-                  background: "linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(239,68,68,0.35) 100%)",
+                  background: mainSession.isOngoing
+                    ? "linear-gradient(135deg, rgba(239,68,68,0.5) 0%, rgba(255,255,255,0.4) 100%)"
+                    : "linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(239,68,68,0.35) 100%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
@@ -137,7 +146,7 @@ export default function UpcomingSessionClient({
                   filter: "drop-shadow(0 2px 12px rgba(239,68,68,0.4))",
                 }}
               >
-                UPNEXT
+                {mainSession.isOngoing ? "LIVE" : "UPNEXT"}
               </span>
             </div>
 
