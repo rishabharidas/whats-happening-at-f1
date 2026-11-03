@@ -19,7 +19,7 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Quick Links (Curated Essential 4) */}
+          {/* Quick Links */}
           <div className="grid grid-cols-2 gap-8 md:justify-center">
             <div className="flex flex-col gap-3">
               <h4 className="text-white text-xs font-bold uppercase tracking-widest mb-1">
@@ -37,13 +37,19 @@ export default function Footer() {
               >
                 Results
               </Link>
+              <Link
+                href="/live"
+                className="text-zinc-400 hover:text-white hover:translate-x-0.5 transition-all text-sm uppercase font-medium"
+              >
+                Live Radar
+              </Link>
             </div>
             <div className="flex flex-col gap-3">
               <h4 className="text-white text-xs font-bold uppercase tracking-widest mb-1">
                 Overview
               </h4>
               <Link
-                href="/#drivers-standings"
+                href="/standings"
                 className="text-zinc-400 hover:text-white hover:translate-x-0.5 transition-all text-sm uppercase font-medium"
               >
                 Standings
@@ -53,6 +59,12 @@ export default function Footer() {
                 className="text-zinc-400 hover:text-white hover:translate-x-0.5 transition-all text-sm uppercase font-medium"
               >
                 Paddock News
+              </Link>
+              <Link
+                href="/explore"
+                className="text-zinc-400 hover:text-white hover:translate-x-0.5 transition-all text-sm uppercase font-medium"
+              >
+                Explore Hub
               </Link>
             </div>
           </div>

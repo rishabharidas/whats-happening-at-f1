@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import TeamLogo from "@/components/TeamLogo";
+import CircuitGraphic from "@/components/CircuitGraphic";
 import { checkSessionTiming } from "@/utils/sessionTiming";
 
 type SessionInfo = { name: string; dateStr: string };
@@ -175,14 +176,16 @@ function RaceCard({
               </div>
             )}
 
-            {/* Circuit image (right, small) */}
-            {race.circuitImage && !isPast && (
-              <div className="hidden md:flex items-center justify-center w-24 flex-shrink-0 opacity-40 group-hover:opacity-70 transition-opacity">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={race.circuitImage}
-                  alt={race.circuitName}
-                  className="w-24 h-auto object-contain filter contrast-125"
+            {/* Circuit graphic (right, small) */}
+            {!isPast && (
+              <div className="hidden md:flex items-center justify-center w-28 h-14 flex-shrink-0 opacity-40 group-hover:opacity-85 transition-opacity">
+                <CircuitGraphic
+                  circuitImage={race.circuitImage}
+                  circuitName={race.circuitName}
+                  circuitLocation={race.country}
+                  raceName={race.raceName}
+                  variant="compact"
+                  className="w-24 h-12"
                 />
               </div>
             )}

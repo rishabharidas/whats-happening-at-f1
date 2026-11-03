@@ -4,6 +4,8 @@ import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import TeamLogo from "@/components/TeamLogo";
+import CircuitGraphic from "@/components/CircuitGraphic";
+import DriverGraphic from "@/components/DriverGraphic";
 import { LiveStatusData, EventPhase } from "@/utils/liveStatus";
 
 interface HeroSectionProps {
@@ -17,9 +19,12 @@ export default function HeroSection({ statusData }: HeroSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => setMounted(true), 0);
     const interval = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(timer);
+      clearInterval(interval);
+    };
   }, []);
 
   const heroStats = statusData?.heroStats;
@@ -71,7 +76,7 @@ export default function HeroSection({ statusData }: HeroSectionProps) {
 
   const defaultWinnerPhoto =
     heroStats?.latestWinner?.headshotUrl ||
-    "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/M/MAXVER01_Max_Verstappen/maxver01.png.transform/4col/image.png";
+    "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/C/CARSAI01_Carlos_Sainz/carsai01.png.transform/4col/image.png";
 
   // Status badge config for Session Tracker Tile
   let statusBadgeLabel = "SCHEDULED";
@@ -99,11 +104,20 @@ export default function HeroSection({ statusData }: HeroSectionProps) {
     statusHeadline = `Next: ${nextSession?.sessionName || "Track Session"}`;
     statusSubtext = `${targetFormatted.weekday} • ${targetFormatted.time}`;
   } else if (phase === "SESSION_COMPLETED") {
-    statusBadgeLabel = "CONCLUDED";
-    statusBadgeColor = "text-zinc-300 bg-zinc-800 border-zinc-700";
-    statusIndicatorDot = "bg-zinc-400";
-    statusHeadline = `${statusData?.recentSession?.sessionName || "Session"} Finished`;
-    statusSubtext = "Verified in Race Center";
+    const hasTelemetry = Boolean(statusData?.leaderboard && statusData.leaderboard.length > 0);
+    if (!hasTelemetry) {
+      statusBadgeLabel = "NO DATA RECEIVED";
+      statusBadgeColor = "text-amber-300 bg-amber-950/70 border-amber-600/60";
+      statusIndicatorDot = "bg-amber-400";
+      statusHeadline = `${statusData?.recentSession?.sessionName || "Session"} Concluded`;
+      statusSubtext = "No timing data received so far • Results pending";
+    } else {
+      statusBadgeLabel = "CONCLUDED";
+      statusBadgeColor = "text-zinc-300 bg-zinc-800 border-zinc-700";
+      statusIndicatorDot = "bg-zinc-400";
+      statusHeadline = `${statusData?.recentSession?.sessionName || "Session"} Finished`;
+      statusSubtext = "Verified in Race Center";
+    }
   } else if (phase === "UNAVAILABLE_OR_STALE") {
     statusBadgeLabel = "OFFLINE";
     statusBadgeColor = "text-amber-400 bg-amber-950/60 border-amber-600/50";
@@ -179,18 +193,51 @@ export default function HeroSection({ statusData }: HeroSectionProps) {
               <span>@F1</span>
             </h1>
           </div>
-          <div className="flex flex-row sm:flex-col items-start sm:items-end justify-between sm:justify-start gap-2">
-            <p className="text-xs sm:text-sm font-sans text-zinc-400 max-w-xs sm:max-w-sm leading-relaxed sm:text-right hidden sm:block">
-              Live telemetry &amp; championship intelligence.
-            </p>
+          <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/explore"
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900/90 hover:bg-red-600/20 border border-zinc-700 hover:border-red-500/80 text-zinc-300 hover:text-white text-[11px] font-mono font-bold uppercase tracking-wider transition-all group"
+              className="inline-flex items-center gap-1.5 px-3 py-1 sm:py-1.5 rounded-full bg-zinc-900/90 hover:bg-red-600/20 border border-zinc-700 hover:border-red-500/80 text-zinc-300 hover:text-white text-[11px] font-mono font-bold uppercase tracking-wider transition-all group"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-red-500 group-hover:bg-red-400 animate-pulse" />
-              <span>Explore The Paddock</span>
+              <span>Explore Paddock</span>
               <span className="text-zinc-500 group-hover:text-red-400 group-hover:translate-x-0.5 transition-all" aria-hidden="true">&rarr;</span>
             </Link>
+          </div>
+        </div>
+
+        {/* MOTORSPORT PIT WALL STATUS HUD */}
+        <div className="hero-anim-header flex flex-wrap items-center justify-between gap-3 px-3.5 sm:px-5 py-2.5 rounded-xl bg-zinc-950/80 border border-zinc-800/90 shadow-lg backdrop-blur-md">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-2.5 w-2.5 relative">
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${isLive ? "bg-red-400" : "bg-emerald-400"} opacity-75`} />
+              <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isLive ? "bg-red-600" : "bg-emerald-500"}`} />
+            </span>
+            <span className="text-[11px] sm:text-xs font-mono font-bold tracking-widest uppercase text-white">
+              {isLive ? "LIVE TRACK SESSION ACTIVE" : `RACE WEEKEND // ROUND ${featured?.round || "18"}`}
+            </span>
+            <span className="hidden sm:inline text-zinc-600 font-mono text-xs">|</span>
+            <span className="hidden sm:inline text-xs font-mono text-zinc-400 truncate max-w-xs">
+              {featured?.circuit || "Circuit of the Americas, Austin TX"}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 sm:gap-3 text-xs font-mono text-zinc-300">
+            <div className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800">
+              <span className="text-amber-400 text-[10px] font-bold">TRACK</span>
+              <span className="font-bold text-white text-[11px]">
+                {statusData?.weather?.trackTemp ? `${statusData.weather.trackTemp.toFixed(1)}°C` : "34.2°C"}
+              </span>
+            </div>
+            <div className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800">
+              <span className="text-cyan-400 text-[10px] font-bold">AIR</span>
+              <span className="font-bold text-white text-[11px]">
+                {statusData?.weather?.airTemp ? `${statusData.weather.airTemp.toFixed(1)}°C` : "24.5°C"}
+              </span>
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-600/40 text-emerald-400 text-[11px] font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>FIA GREEN FLAG</span>
+            </div>
           </div>
         </div>
 
@@ -205,8 +252,8 @@ export default function HeroSection({ statusData }: HeroSectionProps) {
           {/* Mobile: col-span-2 (Full Width) | Desktop: md:col-span-7 */}
           {/* ------------------------------------------------------- */}
           <Link
-            href="#drivers-standings"
-            aria-label={`Championship Leader: ${heroStats?.wdcLeader?.fullName || "Andrea Kimi Antonelli"}`}
+            href="/standings"
+            aria-label={`Championship Leader: ${heroStats?.wdcLeader?.fullName || "Max Verstappen"}`}
             className="hero-anim-card group col-span-2 md:col-span-7 relative flex flex-col justify-between p-4 sm:p-7 rounded-2xl bg-gradient-to-br from-[#00A19B] via-[#016f6b] to-[#043d3b] text-white shadow-2xl overflow-hidden min-h-[200px] sm:min-h-[270px] md:min-h-[310px] transition-all duration-300 hover:scale-[1.01] hover:shadow-cyan-900/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
           >
             {/* Top Row: Subtitle Tag & Circular Arrow Button */}
@@ -227,17 +274,17 @@ export default function HeroSection({ statusData }: HeroSectionProps) {
             {/* Middle: Driver Name & Constructor */}
             <div className="relative z-10 my-auto max-w-[62%] sm:max-w-[60%]">
               <span className="text-xs sm:text-xl font-bold uppercase tracking-tight text-white/90 block">
-                {heroStats?.wdcLeader?.fullName.split(" ").slice(0, -1).join(" ") || "Andrea Kimi"}
+                {heroStats?.wdcLeader?.fullName.split(" ").slice(0, -1).join(" ") || "Max"}
               </span>
               <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black italic uppercase tracking-tighter text-white leading-[0.9] drop-shadow-md">
-                {heroStats?.wdcLeader?.fullName.split(" ").slice(-1)[0] || "ANTONELLI"}
+                {heroStats?.wdcLeader?.fullName.split(" ").slice(-1)[0] || "VERSTAPPEN"}
               </h2>
               <div className="flex items-center gap-1.5 mt-1.5 sm:mt-2">
                 <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-black/40 border border-white/20 flex items-center justify-center p-0.5 flex-shrink-0 backdrop-blur-sm">
-                  <TeamLogo teamName={heroStats?.wdcLeader?.teamName || "Mercedes"} size={11} className="w-2.5 h-2.5 object-contain" />
+                  <TeamLogo teamName={heroStats?.wdcLeader?.teamName || "Red Bull Racing"} size={11} className="w-2.5 h-2.5 object-contain" />
                 </span>
                 <p className="text-[11px] sm:text-sm font-sans font-medium text-white/85 drop-shadow truncate">
-                  {heroStats?.wdcLeader?.teamName || "Mercedes-AMG Petronas F1 Team"} • {heroStats?.wdcLeader?.points || "340"} PTS
+                  {heroStats?.wdcLeader?.teamName || "Red Bull Racing"} • {heroStats?.wdcLeader?.points || "393"} PTS
                 </p>
               </div>
             </div>
@@ -245,7 +292,7 @@ export default function HeroSection({ statusData }: HeroSectionProps) {
             {/* Bottom: Driver Number & Action Tag */}
             <div className="relative z-10 pt-2 sm:pt-3 border-t border-white/20 flex items-center justify-between text-xs font-mono font-bold">
               <span className="text-white/80 uppercase text-[10px] sm:text-xs">
-                #{heroStats?.wdcLeader?.driverNumber || "12"} {heroStats?.wdcLeader?.driverCode || "ANT"}
+                #{heroStats?.wdcLeader?.driverNumber || "1"} {heroStats?.wdcLeader?.driverCode || "VER"}
               </span>
               <span className="text-white flex items-center gap-1 group-hover:translate-x-0.5 transition-transform text-[10px] sm:text-xs">
                 View Standings &rarr;
@@ -253,23 +300,25 @@ export default function HeroSection({ statusData }: HeroSectionProps) {
             </div>
 
             {/* DRIVER CUTOUT PHOTO POPPING OUT ON THE RIGHT */}
-            {defaultLeaderPhoto && (
-              <div
-                className="hero-anim-driver absolute right-[-2%] sm:right-[0%] bottom-0 w-[48%] sm:w-[48%] max-w-[210px] sm:max-w-[270px] h-[95%] pointer-events-none select-none z-10 flex items-end justify-center"
-                aria-hidden="true"
-                style={{
-                  maskImage: "linear-gradient(to bottom, black 72%, transparent 98%)",
-                  WebkitMaskImage: "linear-gradient(to bottom, black 72%, transparent 98%)",
-                }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={defaultLeaderPhoto}
-                  alt={heroStats?.wdcLeader?.fullName || "Driver"}
-                  className="w-full h-full object-contain object-bottom filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.6)] group-hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-            )}
+            <div
+              className="hero-anim-driver absolute right-[-2%] sm:right-[0%] bottom-0 w-[48%] sm:w-[48%] max-w-[210px] sm:max-w-[270px] h-[95%] pointer-events-none select-none z-10 flex items-end justify-center"
+              aria-hidden="true"
+              style={{
+                maskImage: "linear-gradient(to bottom, black 72%, transparent 98%)",
+                WebkitMaskImage: "linear-gradient(to bottom, black 72%, transparent 98%)",
+              }}
+            >
+              <DriverGraphic
+                headshotUrl={defaultLeaderPhoto}
+                fullName={heroStats?.wdcLeader?.fullName || "Andrea Kimi Antonelli"}
+                code={heroStats?.wdcLeader?.driverCode || "ANT"}
+                driverNumber={heroStats?.wdcLeader?.driverNumber || 12}
+                teamName={heroStats?.wdcLeader?.teamName || "Mercedes"}
+                teamColour="#00D2BE"
+                variant="portrait"
+                className="w-full h-full"
+              />
+            </div>
           </Link>
 
           {/* ------------------------------------------------------- */}
@@ -277,7 +326,7 @@ export default function HeroSection({ statusData }: HeroSectionProps) {
           {/* Mobile: col-span-2 (Full Width) | Desktop: md:col-span-5 */}
           {/* ------------------------------------------------------- */}
           <Link
-            href={featured?.round ? `/race/${featured.round}` : "#race-center"}
+            href={featured?.round ? `/race/${featured.round}` : "/schedule"}
             aria-label={`Next Grand Prix: ${featured?.raceName || "United States Grand Prix"}`}
             className="hero-anim-card group col-span-2 md:col-span-5 relative flex flex-col justify-between p-4 sm:p-6 rounded-2xl bg-[#121318] hover:bg-[#161820] border border-white/10 hover:border-red-600/60 shadow-xl transition-all duration-300 hover:scale-[1.01] overflow-hidden min-h-[190px] sm:min-h-[270px] md:min-h-[310px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
           >
@@ -296,18 +345,14 @@ export default function HeroSection({ statusData }: HeroSectionProps) {
             </div>
 
             <div className="relative z-10 my-auto py-1 sm:py-2 flex items-center justify-center">
-              {featured?.circuitImage ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={featured.circuitImage}
-                  alt={featured.circuit || "Circuit Map"}
-                  className="w-full max-w-[180px] sm:max-w-[220px] max-h-[90px] sm:max-h-[140px] object-contain filter contrast-150 drop-shadow-[0_0_15px_rgba(255,255,255,0.25)] group-hover:scale-105 transition-transform duration-300"
-                />
-              ) : (
-                <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-full border border-zinc-800 flex items-center justify-center text-zinc-600 font-mono text-xs">
-                  CIRCUIT
-                </div>
-              )}
+              <CircuitGraphic
+                circuitImage={featured?.circuitImage}
+                circuitName={featured?.circuit}
+                circuitLocation={featured?.location}
+                raceName={featured?.raceName}
+                variant="hero"
+                className="w-full max-w-[180px] sm:max-w-[220px] max-h-[90px] sm:max-h-[140px]"
+              />
             </div>
 
             <div className="relative z-10 pt-2 sm:pt-3 border-t border-white/10 flex items-end justify-between gap-2 sm:gap-3">
@@ -322,14 +367,30 @@ export default function HeroSection({ statusData }: HeroSectionProps) {
 
               {countdown && !countdown.passed && (
                 <div className="flex flex-col items-end flex-shrink-0">
-                  <span className="text-[8px] sm:text-[9px] font-mono uppercase text-zinc-400">Lights Out</span>
-                  <div className="flex items-baseline gap-1 font-mono">
-                    <span suppressHydrationWarning className="text-sm sm:text-base md:text-lg font-black italic text-white">
-                      {mounted ? `${String(countdown.days).padStart(2, "0")}d` : "--d"}
-                    </span>
-                    <span suppressHydrationWarning className="text-sm sm:text-base md:text-lg font-black italic text-red-500">
-                      {mounted ? `${String(countdown.hours).padStart(2, "0")}h` : "--h"}
-                    </span>
+                  <span className="text-[8px] sm:text-[9px] font-mono uppercase text-zinc-400 mb-1">
+                    Lights Out Countdown
+                  </span>
+                  <div className="flex items-center gap-1 font-mono">
+                    <div className="flex flex-col items-center bg-black/60 border border-white/10 px-1.5 py-0.5 rounded shadow-inner">
+                      <span suppressHydrationWarning className="text-xs sm:text-sm font-black text-white">
+                        {mounted ? String(countdown.days).padStart(2, "0") : "--"}
+                      </span>
+                      <span className="text-[7px] font-bold text-zinc-500 uppercase">DAYS</span>
+                    </div>
+                    <span className="text-red-500 font-bold text-xs">:</span>
+                    <div className="flex flex-col items-center bg-black/60 border border-white/10 px-1.5 py-0.5 rounded shadow-inner">
+                      <span suppressHydrationWarning className="text-xs sm:text-sm font-black text-white">
+                        {mounted ? String(countdown.hours).padStart(2, "0") : "--"}
+                      </span>
+                      <span className="text-[7px] font-bold text-zinc-500 uppercase">HRS</span>
+                    </div>
+                    <span className="text-red-500 font-bold text-xs">:</span>
+                    <div className="flex flex-col items-center bg-black/60 border border-white/10 px-1.5 py-0.5 rounded shadow-inner">
+                      <span suppressHydrationWarning className="text-xs sm:text-sm font-black text-red-500">
+                        {mounted ? String(countdown.minutes).padStart(2, "0") : "--"}
+                      </span>
+                      <span className="text-[7px] font-bold text-zinc-500 uppercase">MIN</span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -347,7 +408,7 @@ export default function HeroSection({ statusData }: HeroSectionProps) {
           >
             <div className="relative z-10 flex items-center justify-between">
               <div className="flex items-center gap-1 sm:gap-1.5">
-                <span className="text-red-500 font-mono font-black text-[10px] sm:text-xs">///</span>
+                <span className="text-red-500 font-mono font-black text-[10px] sm:text-xs">{"///"}</span>
                 <span className="text-[11px] sm:text-xs font-mono font-black uppercase text-yellow-400">
                   {heroStats?.latestWinner?.driverCode || "VER"}
                 </span>
@@ -367,14 +428,14 @@ export default function HeroSection({ statusData }: HeroSectionProps) {
 
             <div className="relative z-10 my-1.5 sm:my-2 max-w-[85%] sm:max-w-[65%]">
               <h3 className="text-sm sm:text-lg md:text-xl font-black italic uppercase tracking-tight text-white group-hover:text-yellow-400 transition-colors truncate">
-                {heroStats?.latestWinner?.fullName || "Max Verstappen"}
+                {heroStats?.latestWinner?.fullName || "Carlos Sainz"}
               </h3>
               <div className="flex items-center gap-1 sm:gap-1.5 mt-0.5 sm:mt-1 truncate">
                 <span className="w-3.5 h-3.5 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center p-0.5 flex-shrink-0">
-                  <TeamLogo teamName={heroStats?.latestWinner?.teamName || "Red Bull Racing"} size={10} className="w-2.5 h-2.5 object-contain" />
+                  <TeamLogo teamName={heroStats?.latestWinner?.teamName || "Ferrari"} size={10} className="w-2.5 h-2.5 object-contain" />
                 </span>
                 <p className="text-[10px] sm:text-xs font-mono text-zinc-400 truncate">
-                  {heroStats?.latestWinner?.raceName ? heroStats.latestWinner.raceName.replace("Grand Prix", "GP") : "Singapore GP"}
+                  {heroStats?.latestWinner?.raceName ? heroStats.latestWinner.raceName.replace("Grand Prix", "GP") : "Mexico City GP"}
                 </p>
               </div>
             </div>
@@ -399,19 +460,21 @@ export default function HeroSection({ statusData }: HeroSectionProps) {
               )}
             </div>
 
-            {defaultWinnerPhoto && (
-              <div
-                className="absolute right-[-6%] sm:right-[-4%] bottom-0 w-[48%] sm:w-[42%] max-w-[130px] h-[90%] sm:h-[92%] pointer-events-none select-none z-10 flex items-end justify-center opacity-25 sm:opacity-100"
-                aria-hidden="true"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={defaultWinnerPhoto}
-                  alt={heroStats?.latestWinner?.fullName || "Winner"}
-                  className="w-full h-full object-contain object-bottom filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.5)] group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-            )}
+            <div
+              className="absolute right-[-6%] sm:right-[-4%] bottom-0 w-[48%] sm:w-[42%] max-w-[130px] h-[90%] sm:h-[92%] pointer-events-none select-none z-10 flex items-end justify-center opacity-25 sm:opacity-100"
+              aria-hidden="true"
+            >
+              <DriverGraphic
+                headshotUrl={defaultWinnerPhoto}
+                fullName={heroStats?.latestWinner?.fullName || "Carlos Sainz"}
+                code={heroStats?.latestWinner?.driverCode || "SAI"}
+                driverNumber={heroStats?.latestWinner?.driverNumber || 55}
+                teamName={heroStats?.latestWinner?.teamName || "Ferrari"}
+                teamColour="#E80020"
+                variant="winner-tile"
+                className="w-full h-full"
+              />
+            </div>
           </Link>
 
           {/* ------------------------------------------------------- */}
@@ -419,7 +482,7 @@ export default function HeroSection({ statusData }: HeroSectionProps) {
           {/* Mobile: col-span-1 (Side-by-side) | Desktop: md:col-span-4 */}
           {/* ------------------------------------------------------- */}
           <Link
-            href="#race-center"
+            href="/live"
             aria-label={`Session Tracker: ${statusHeadline}`}
             className="hero-anim-card group col-span-1 md:col-span-4 relative flex flex-col justify-between p-3.5 sm:p-5 rounded-2xl bg-[#121318] hover:bg-[#161820] border border-white/10 hover:border-red-600/50 shadow-xl transition-all duration-300 hover:scale-[1.01] overflow-hidden min-h-[160px] sm:min-h-[175px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
           >
@@ -460,13 +523,13 @@ export default function HeroSection({ statusData }: HeroSectionProps) {
           {/* Mobile: col-span-2 (Full Width bar) | Desktop: md:col-span-4 */}
           {/* ------------------------------------------------------- */}
           <Link
-            href="#drivers-standings"
+            href="/standings"
             aria-label="Championship Title Fight"
             className="hero-anim-card group col-span-2 md:col-span-4 relative flex flex-col justify-between p-3.5 sm:p-5 rounded-2xl bg-[#121318] hover:bg-[#161820] border border-white/10 hover:border-cyan-500/50 shadow-xl transition-all duration-300 hover:scale-[1.01] overflow-hidden min-h-[160px] sm:min-h-[175px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
           >
             <div className="relative z-10 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                <span className="text-cyan-400 font-mono font-black text-[10px] sm:text-xs">///</span>
+                <span className="text-cyan-400 font-mono font-black text-[10px] sm:text-xs">{"///"}</span>
                 <span className="text-[11px] sm:text-xs font-mono font-black uppercase text-white">
                   2026 TITLE FIGHT
                 </span>

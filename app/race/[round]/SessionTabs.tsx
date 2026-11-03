@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Podium from "@/components/Podium";
 import TeamLogo from "@/components/TeamLogo";
+import CircuitGraphic from "@/components/CircuitGraphic";
 import PracticeClassification from "./PracticeClassification";
 import QualifyingClassification from "./QualifyingClassification";
 import SprintClassification from "./SprintClassification";
@@ -38,6 +39,41 @@ function statusLabel(status: string) {
   return map[status] || status;
 }
 
+interface RaceResultEntry {
+  position?: string | number;
+  number?: string | number;
+  points?: string | number;
+  status?: string;
+  laps?: string;
+  grid?: string;
+  Driver?: {
+    driverId?: string;
+    permanentNumber?: string;
+    code?: string;
+    givenName?: string;
+    familyName?: string;
+  };
+  Constructor?: {
+    constructorId?: string;
+    name?: string;
+  };
+  Time?: {
+    time?: string;
+    millis?: string;
+  };
+  FastestLap?: {
+    rank?: string;
+    lap?: string;
+    Time?: {
+      time?: string;
+    };
+    AverageSpeed?: {
+      speed?: string;
+    };
+  };
+  [key: string]: unknown;
+}
+
 export default function SessionTabs({
   sessions,
   circuitImage,
@@ -69,7 +105,8 @@ export default function SessionTabs({
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleSelectSession = (id: string) => {
@@ -120,9 +157,9 @@ export default function SessionTabs({
     const winner = results[0];
     const podium = results.slice(0, 3);
     const retirements = results.filter(
-      (r: any) => !r.status?.startsWith("+") && r.status !== "Finished"
+      (r: RaceResultEntry) => !r.status?.startsWith("+") && r.status !== "Finished"
     );
-    const fastestLapHolder = results.find((r: any) => r.FastestLap?.rank === "1");
+    const fastestLapHolder = results.find((r: RaceResultEntry) => r.FastestLap?.rank === "1");
     const winnerTeamColor = `#${
       TEAM_COLORS[winner.Constructor?.name?.toLowerCase() || ""] || "E80020"
     }`;
@@ -176,23 +213,14 @@ export default function SessionTabs({
             </div>
 
             {/* Circuit Map */}
-            <div className="w-full md:w-80 border-t md:border-t-0 md:border-l border-zinc-800/80 bg-zinc-950/20 flex flex-col justify-center items-center">
-              {circuitImage ? (
-                <div className="w-full h-48 md:h-64 flex items-center justify-center p-8 relative">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={circuitImage}
-                    alt="Circuit outline map"
-                    className="w-full h-full object-contain filter invert opacity-75 contrast-125 drop-shadow-[0_0_10px_rgba(255,255,255,0.05)] hover:scale-102 transition-transform duration-300 pointer-events-none"
-                  />
-                </div>
-              ) : (
-                <div className="w-full h-48 md:h-64 flex items-center justify-center">
-                  <span className="text-xs font-black text-zinc-600 tracking-widest font-mono uppercase">
-                    Circuit Map N/A
-                  </span>
-                </div>
-              )}
+            <div className="w-full md:w-80 border-t md:border-t-0 md:border-l border-zinc-800/80 bg-zinc-950/20 flex flex-col justify-center items-center p-4">
+              <CircuitGraphic
+                circuitImage={circuitImage}
+                circuitName={activeSession.name}
+                raceName={activeSession.name}
+                variant="card"
+                className="w-full h-44 md:h-56"
+              />
             </div>
           </div>
         </div>
@@ -206,21 +234,22 @@ export default function SessionTabs({
             </h3>
           </div>
           {(() => {
-            const podiumDrivers = podium.map((result: any) => {
+            const podiumDrivers = podium.map((result: RaceResultEntry) => {
               const driver = result.Driver || {};
               const constructor = result.Constructor || {};
               const teamName = constructor?.name || "";
               const driverNumber = String(driver.permanentNumber || result.number);
               const headshotUrl = driverImages[driverNumber] || "";
 
+              const posNum = parseInt(String(result.position || "0"), 10);
               return {
-                position: parseInt(result.position, 10),
-                name_acronym: driver.code,
-                full_name: `${driver.givenName} ${driver.familyName}`,
+                position: posNum,
+                name_acronym: driver.code || "F1",
+                full_name: `${driver.givenName || ""} ${driver.familyName || ""}`.trim() || "F1 Driver",
                 team_name: teamName,
                 team_colour: TEAM_COLORS[teamName.toLowerCase()] || "333333",
                 headshot_url: headshotUrl,
-                time: result.Time?.time || (parseInt(result.position, 10) === 1 ? "Winner" : undefined),
+                time: result.Time?.time || (posNum === 1 ? "Winner" : undefined),
                 points: result.points,
                 driver_number: driverNumber,
               };
@@ -272,7 +301,7 @@ export default function SessionTabs({
                   </div>
                 </div>
               )}
-              {retirements.slice(0, 8).map((r: any, i: number) => (
+              {retirements.slice(0, 8).map((r: RaceResultEntry, i: number) => (
                 <div
                   key={i}
                   className="flex items-center gap-4 p-4 rounded-xl border border-zinc-800/50 bg-zinc-900/20"
@@ -289,8 +318,8 @@ export default function SessionTabs({
                     <p className="text-zinc-300 font-bold text-sm">
                       {r.Driver?.givenName} {r.Driver?.familyName}
                     </p>
-                    <p className={`text-xs font-mono ${statusColor(r.status)}`}>
-                      {statusLabel(r.status)} — Lap {r.laps}
+                    <p className={`text-xs font-mono ${statusColor(r.status || "")}`}>
+                      {statusLabel(r.status || "")} — Lap {r.laps || "?"}
                     </p>
                   </div>
                 </div>
@@ -329,7 +358,7 @@ export default function SessionTabs({
                 </tr>
               </thead>
               <tbody>
-                {results.map((result: any, i: number) => {
+                {results.map((result: RaceResultEntry, i: number) => {
                   const teamColor = `#${
                     TEAM_COLORS[result.Constructor?.name?.toLowerCase() || ""] || "333"
                   }`;
@@ -339,7 +368,7 @@ export default function SessionTabs({
                   const hasFastestLap = result.FastestLap?.rank === "1";
                   const fullName = `${result.Driver?.givenName} ${result.Driver?.familyName}`;
                   const qualiPos = qualiPositions[fullName];
-                  const posDiff = qualiPos ? qualiPos - parseInt(result.position, 10) : null;
+                  const posDiff = qualiPos ? qualiPos - parseInt(String(result.position || "0"), 10) : null;
 
                   // 1. Race Completed Time (Winner) or Gap to Leader
                   let timeOrGapDisplay = "";
@@ -352,11 +381,11 @@ export default function SessionTabs({
                     timeOrGapDisplay = result.status;
                   } else if (result.status === "Lapped") {
                     const lapDiff = results[0]?.laps
-                      ? parseInt(results[0].laps, 10) - parseInt(result.laps || "0", 10)
+                      ? parseInt(String(results[0].laps), 10) - parseInt(String(result.laps || "0"), 10)
                       : 1;
                     timeOrGapDisplay = `+${lapDiff} Lap${lapDiff > 1 ? "s" : ""}`;
                   } else {
-                    timeOrGapDisplay = statusLabel(result.status);
+                    timeOrGapDisplay = statusLabel(result.status || "");
                   }
 
                   // 2. Interval Between Each Consecutive Racer
@@ -462,7 +491,7 @@ export default function SessionTabs({
                                 ? "text-amber-400 font-black"
                                 : finished
                                   ? "text-zinc-200"
-                                  : statusColor(result.status)
+                                  : statusColor(result.status || "")
                             }`}
                           >
                             {timeOrGapDisplay}
@@ -491,7 +520,7 @@ export default function SessionTabs({
                       <td className="px-4 py-3">
                         <span
                           className={`text-xs font-black ${
-                            parseInt(result.points, 10) > 0
+                            parseInt(String(result.points || "0"), 10) > 0
                               ? "text-white"
                               : "text-zinc-600"
                           }`}
@@ -538,16 +567,15 @@ export default function SessionTabs({
           </div>
         </div>
 
-        {circuitImage && (
-          <div className="w-56 h-56 flex items-center justify-center p-4 bg-zinc-950/40 rounded-2xl border border-zinc-800/80 flex-shrink-0">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={circuitImage}
-              alt="Circuit outline"
-              className="w-full h-full object-contain filter invert opacity-60 contrast-125 pointer-events-none"
-            />
-          </div>
-        )}
+        <div className="w-56 h-56 flex items-center justify-center p-4 bg-zinc-950/40 rounded-2xl border border-zinc-800/80 flex-shrink-0">
+          <CircuitGraphic
+            circuitImage={circuitImage}
+            circuitName={activeSession.name}
+            raceName={activeSession.name}
+            variant="card"
+            className="w-full h-full"
+          />
+        </div>
       </div>
     );
   };

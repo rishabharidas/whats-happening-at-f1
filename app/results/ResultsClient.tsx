@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useState, useEffect } from "react";
 import TeamLogo from "@/components/TeamLogo";
+import DriverGraphic from "@/components/DriverGraphic";
 
 type RaceInfo = {
   round: string;
@@ -198,20 +198,16 @@ export default function ResultsClient({ races }: { races: RaceInfo[] }) {
                       {/* Driver Showcase */}
                       <div className="flex items-center gap-4 p-2 bg-zinc-950/40 border border-zinc-800/40 rounded-2xl w-full sm:w-64 md:w-72 flex-shrink-0">
                         {/* Driver Headshot */}
-                        <div className="w-16 h-16 relative bg-zinc-900 rounded-xl overflow-hidden flex-shrink-0 border border-zinc-800">
-                          {race.winner.headshotUrl ? (
-                            <Image
-                              src={race.winner.headshotUrl}
-                              alt={race.winner.name}
-                              width={80}
-                              height={80}
-                              className="object-contain drop-shadow-md scale-110 translate-y-1"
-                            />
-                          ) : (
-                            <div className="absolute inset-0 flex items-center justify-center text-xs font-black italic text-zinc-600">
-                              {race.winner.code}
-                            </div>
-                          )}
+                        <div className="w-16 h-16 relative bg-zinc-900 rounded-xl overflow-hidden flex-shrink-0 border border-zinc-800 flex items-center justify-center">
+                          <DriverGraphic
+                            headshotUrl={race.winner.headshotUrl}
+                            fullName={race.winner.name}
+                            code={race.winner.code}
+                            driverNumber={race.winner.number}
+                            teamName={race.winner.team}
+                            variant="winner-tile"
+                            className="w-full h-full"
+                          />
                         </div>
 
                         {/* Driver Name & Constructor */}

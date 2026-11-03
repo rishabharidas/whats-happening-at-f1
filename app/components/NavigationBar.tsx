@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from "react";
 export default function NavigationBar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
 
@@ -35,6 +36,7 @@ export default function NavigationBar() {
       } else {
         setIsScrolled(false);
         setIsMenuOpen(false); // Close the dock if we scroll back to top
+        setIsMoreOpen(false);
         setDragOffset({ x: 0, y: 0 }); // Reset drag offsets when back at top
         dragOffsetRef.current = { x: 0, y: 0 };
         if (navRef.current) {
@@ -51,21 +53,22 @@ export default function NavigationBar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Collapse dock when clicking outside of it
+  // Collapse dock or popovers when clicking outside of it
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (navRef.current && !navRef.current.contains(event.target as Node)) {
         setIsMenuOpen(false);
+        setIsMoreOpen(false);
       }
     };
 
-    if (isMenuOpen) {
+    if (isMenuOpen || isMoreOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isMenuOpen]);
+  }, [isMenuOpen, isMoreOpen]);
 
   // Pointer event handlers for dragging the collapsed bubble
   const handlePointerDown = (e: React.PointerEvent<HTMLElement>) => {
@@ -98,7 +101,7 @@ export default function NavigationBar() {
 
     const width = window.innerWidth;
     const isMd = width >= 768;
-    const initialY = isMd ? 32 : 24;
+    const initialY = isMd ? 16 : 12;
 
     // Clamp coordinates relative to the left-1/2 anchor line
     const minX = 44 - width / 2;
@@ -148,7 +151,7 @@ export default function NavigationBar() {
 
     const width = window.innerWidth;
     const isMd = width >= 768;
-    const initialY = isMd ? 32 : 24;
+    const initialY = isMd ? 16 : 12;
 
     if (isMenuOpen) {
       // Expanded dock state: Calculate anti-collision clamping boundaries to fit screen beautifully
@@ -191,7 +194,7 @@ export default function NavigationBar() {
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       style={transformStyle ? { transform: transformStyle } : undefined}
-      className={`fixed z-[999] top-6 md:top-8 left-1/2 flex items-center touch-none select-none
+      className={`fixed z-[999] top-3 sm:top-4 left-1/2 flex items-center touch-none select-none
         ${isDragging ? "transition-none" : "transition-[width,height,background-color,border-color,box-shadow,transform,opacity] duration-300 ease-in-out"}
         ${
           !isScrolled
@@ -224,33 +227,121 @@ export default function NavigationBar() {
           isScrolled && !isMenuOpen
             ? "opacity-0 scale-75 pointer-events-none absolute"
             : "opacity-100 scale-100"
-        } ${
-          isScrolled && isMenuOpen
-            ? "gap-3 sm:gap-5 font-mono font-medium text-xs sm:text-sm text-zinc-300"
-            : "gap-3 font-mono font-light text-sm text-zinc-300"
-        }`}
+        } gap-2.5 sm:gap-4 md:gap-5 font-mono text-xs sm:text-sm text-zinc-300`}
       >
         <Link
           href="/schedule"
-          onClick={() => setIsMenuOpen(false)}
+          onClick={() => {
+            setIsMenuOpen(false);
+            setIsMoreOpen(false);
+          }}
           className="hover:text-red-500 transition-colors"
         >
           schedule
         </Link>
         <Link
+          href="/standings"
+          onClick={() => {
+            setIsMenuOpen(false);
+            setIsMoreOpen(false);
+          }}
+          className="hover:text-red-500 transition-colors"
+        >
+          standings
+        </Link>
+        <Link
           href="/results"
-          onClick={() => setIsMenuOpen(false)}
+          onClick={() => {
+            setIsMenuOpen(false);
+            setIsMoreOpen(false);
+          }}
           className="hover:text-red-500 transition-colors"
         >
           results
         </Link>
+
+        {/* Live and Explore: Visible inline on tablet/desktop */}
+        <Link
+          href="/live"
+          onClick={() => {
+            setIsMenuOpen(false);
+            setIsMoreOpen(false);
+          }}
+          className="hidden md:inline-flex items-center gap-1 hover:text-red-500 transition-colors"
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
+          <span>live</span>
+        </Link>
         <Link
           href="/explore"
-          onClick={() => setIsMenuOpen(false)}
-          className="hover:text-red-500 transition-colors"
+          onClick={() => {
+            setIsMenuOpen(false);
+            setIsMoreOpen(false);
+          }}
+          className="hidden md:inline-block hover:text-red-500 transition-colors"
         >
           explore
         </Link>
+
+        {/* Mobile More Toggle (···) */}
+        <div className="relative md:hidden flex items-center">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsMoreOpen((prev) => !prev);
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+              isMoreOpen ? "text-white bg-zinc-800" : "text-zinc-400 hover:text-white"
+            }`}
+            aria-label="More navigation links"
+            aria-expanded={isMoreOpen}
+          >
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <circle cx="5" cy="12" r="2" />
+              <circle cx="12" cy="12" r="2" />
+              <circle cx="19" cy="12" r="2" />
+            </svg>
+          </button>
+
+          {/* Mobile Popover Menu */}
+          {isMoreOpen && (
+            <div className="absolute right-0 top-10 w-44 rounded-2xl bg-zinc-950/95 border border-zinc-800 backdrop-blur-xl shadow-2xl p-1.5 flex flex-col gap-0.5 z-[1000] animate-fadeIn">
+              <Link
+                href="/live"
+                onClick={() => {
+                  setIsMoreOpen(false);
+                  setIsMenuOpen(false);
+                }}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-mono font-bold text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
+                <span>Live Radar</span>
+              </Link>
+              <Link
+                href="/explore"
+                onClick={() => {
+                  setIsMoreOpen(false);
+                  setIsMenuOpen(false);
+                }}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-mono font-bold text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
+              >
+                <span>Explore Hub</span>
+              </Link>
+              <Link
+                href="/explore/lexicon"
+                onClick={() => {
+                  setIsMoreOpen(false);
+                  setIsMenuOpen(false);
+                }}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-mono font-bold text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
+              >
+                <span>Tech Lexicon</span>
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Bubble Icon (Hamburger): Visible ONLY in Bubble state */}

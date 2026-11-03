@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import Image from "next/image";
 import gsap from "gsap";
 import TeamLogo from "@/components/TeamLogo";
+import DriverGraphic from "@/components/DriverGraphic";
 
 interface DriverStanding {
   position: number;
@@ -256,19 +256,15 @@ export default function StandingsClient({
                           borderColor: teamHex,
                         }}
                       >
-                        {driver.headshot_url ? (
-                          <Image
-                            src={driver.headshot_url}
-                            alt={driver.full_name}
-                            fill
-                            sizes="44px"
-                            className="object-cover object-top scale-110"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-[10px] font-mono font-bold text-zinc-400 uppercase">
-                            #{driver.driver_number}
-                          </div>
-                        )}
+                        <DriverGraphic
+                          headshotUrl={driver.headshot_url}
+                          fullName={driver.full_name}
+                          driverNumber={driver.driver_number}
+                          teamName={driver.team_name}
+                          teamColour={teamHex}
+                          variant="avatar"
+                          className="w-full h-full"
+                        />
                       </div>
 
                       <div className="flex flex-col min-w-0">

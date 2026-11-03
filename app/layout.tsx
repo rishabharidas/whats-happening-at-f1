@@ -45,7 +45,7 @@ export default function RootLayout({
         <F1InitialStartSequence />
         <SmoothScroll>
           <NavigationBar />
-          <div className="pt-24 sm:pt-28 md:pt-32 w-full max-w-full overflow-x-hidden flex-1">{children}</div>
+          <div className="pt-16 sm:pt-18 md:pt-20 w-full max-w-full overflow-x-hidden flex-1">{children}</div>
           <Footer />
         </SmoothScroll>
       </body>

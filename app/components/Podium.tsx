@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import TeamLogo from "@/components/TeamLogo";
+import DriverGraphic from "@/components/DriverGraphic";
 
 export interface PodiumDriver {
   position: number;
@@ -130,7 +130,7 @@ export default function Podium({
           auraColor: "rgba(245, 158, 11, 0.25)",
           // Compact on mobile (w-24/h-24 = 96px), grand on desktop (w-56/h-56 = 224px)
           photoSize: "w-24 h-24 sm:w-28 sm:h-28 md:w-56 md:h-56 lg:w-60 lg:h-60",
-          cardWidth: "w-full max-w-[330px] sm:max-w-[360px] md:max-w-[340px] lg:max-w-[360px]",
+          cardWidth: "w-full max-w-[360px] sm:max-w-[400px] md:max-w-[340px] lg:max-w-[360px]",
           elevation: "z-20 md:-translate-y-4",
           orderClass: "order-1 md:order-2",
           isWinner: true,
@@ -142,7 +142,7 @@ export default function Podium({
           cardBorder: "border-zinc-400/50 shadow-[0_0_15px_rgba(212,212,216,0.1)]",
           auraColor: "rgba(212, 212, 216, 0.15)",
           photoSize: "w-20 h-20 sm:w-24 sm:h-24 md:w-44 md:h-44 lg:w-48 lg:h-48",
-          cardWidth: "w-full max-w-[330px] sm:max-w-[360px] md:max-w-[290px] lg:max-w-[310px]",
+          cardWidth: "w-full max-w-[360px] sm:max-w-[400px] md:max-w-[290px] lg:max-w-[310px]",
           elevation: "z-10",
           orderClass: "order-2 md:order-1",
           isWinner: false,
@@ -155,7 +155,7 @@ export default function Podium({
           cardBorder: "border-amber-700/50 shadow-[0_0_15px_rgba(180,83,9,0.12)]",
           auraColor: "rgba(180, 83, 9, 0.15)",
           photoSize: "w-20 h-20 sm:w-24 sm:h-24 md:w-44 md:h-44 lg:w-48 lg:h-48",
-          cardWidth: "w-full max-w-[330px] sm:max-w-[360px] md:max-w-[290px] lg:max-w-[310px]",
+          cardWidth: "w-full max-w-[360px] sm:max-w-[400px] md:max-w-[290px] lg:max-w-[310px]",
           elevation: "z-10",
           orderClass: "order-3 md:order-3",
           isWinner: false,
@@ -281,10 +281,10 @@ export default function Podium({
               key={`${driver.name_acronym || driver.full_name}-${position}`}
               className={`podium-card-anim group relative flex flex-col items-center ${styling.cardWidth} ${styling.orderClass} ${styling.elevation} transition-all duration-300 hover:-translate-y-1.5`}
             >
-              {/* DRIVER PORTRAIT */}
-              {/* Scaled down on mobile to prevent dominating the screen; grand & elevated on desktop */}
+              {/* DRIVER PORTRAIT (DESKTOP ELEVATED PEDESTAL ONLY) */}
+              {/* Grand & elevated on desktop; hidden on mobile in favor of the in-card portrait */}
               <div
-                className="relative z-10 flex items-end justify-center -mb-3 sm:-mb-4 md:-mb-6 lg:-mb-8 transition-transform duration-500 group-hover:scale-105 pointer-events-none select-none"
+                className="hidden md:flex relative z-10 items-end justify-center -mb-6 lg:-mb-8 transition-transform duration-500 group-hover:scale-105 pointer-events-none select-none"
               >
                 {/* Team-colored subtle backlight aura */}
                 <div
@@ -302,28 +302,17 @@ export default function Podium({
                     WebkitMaskImage: "linear-gradient(to bottom, black 55%, transparent 98%)",
                   }}
                 >
-                  {driver.headshot_url ? (
-                    <Image
-                      src={driver.headshot_url}
-                      alt={driver.full_name || "Podium Driver"}
-                      width={280}
-                      height={280}
-                      className="object-contain w-full h-full drop-shadow-[0_12px_24px_rgba(0,0,0,0.9)] filter"
-                      priority={styling.isWinner}
-                    />
-                  ) : (
-                    <div
-                      className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full flex flex-col items-center justify-center border-2 shadow-2xl backdrop-blur-md mb-1"
-                      style={{
-                        backgroundColor: "rgba(24, 24, 27, 0.9)",
-                        borderColor: teamHex,
-                      }}
-                    >
-                      <span className="text-base sm:text-lg md:text-xl font-black italic tracking-tighter text-white">
-                        {driver.name_acronym || "F1"}
-                      </span>
-                    </div>
-                  )}
+                  <DriverGraphic
+                    headshotUrl={driver.headshot_url}
+                    fullName={driver.full_name}
+                    code={driver.name_acronym}
+                    driverNumber={driver.driver_number}
+                    teamName={driver.team_name}
+                    teamColour={teamHex}
+                    variant="portrait"
+                    priority={styling.isWinner}
+                    className="w-full h-full"
+                  />
                 </div>
               </div>
 
@@ -351,6 +340,46 @@ export default function Podium({
                   className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 rounded-full blur-3xl opacity-15 pointer-events-none"
                   style={{ backgroundColor: teamHex }}
                 />
+
+                {/* Mobile Driver Portrait: Placed neatly INSIDE the card with smooth gradient fade */}
+                <div
+                  className="md:hidden absolute right-0 bottom-0 h-full w-[48%] max-w-[160px] pointer-events-none select-none flex items-end justify-end overflow-hidden z-0"
+                  style={{
+                    maskImage: "linear-gradient(to right, transparent 0%, black 35%, black 100%)",
+                    WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 35%, black 100%)",
+                  }}
+                  aria-hidden="true"
+                >
+                  {/* Ambient team backlight aura behind photo */}
+                  <div
+                    className="absolute inset-0 rounded-full blur-2xl opacity-35 pointer-events-none"
+                    style={{ backgroundColor: teamHex }}
+                  />
+
+                  {/* Soft gradient fade overlay on the left to seamlessly eliminate hard edges */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#0c0e14] via-[#0c0e14]/40 to-transparent z-10 pointer-events-none" />
+
+                  {/* Subtle top/bottom fade */}
+                  <div
+                    className="w-full h-full flex items-end justify-end"
+                    style={{
+                      maskImage: "linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)",
+                      WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)",
+                    }}
+                  >
+                    <DriverGraphic
+                      headshotUrl={driver.headshot_url}
+                      fullName={driver.full_name}
+                      code={driver.name_acronym}
+                      driverNumber={driver.driver_number}
+                      teamName={driver.team_name}
+                      teamColour={teamHex}
+                      variant="mobile-in-card"
+                      priority={styling.isWinner}
+                      className="w-full h-full object-contain object-bottom"
+                    />
+                  </div>
+                </div>
 
                 {/* ── CARD HEADER TAB (CHAMFERED CORNER) ── */}
                 <div className="relative z-10 flex items-center justify-between border-b border-white/5 bg-zinc-950/40 pr-3 sm:pr-4">
@@ -385,7 +414,7 @@ export default function Podium({
                 </div>
 
                 {/* ── CARD MIDDLE: DRIVER NAME & TEAM IDENTIFICATION (PROMINENT & UNCROWDED) ── */}
-                <div className="relative z-10 px-4 sm:px-5 py-2.5 sm:py-3 flex flex-col justify-center">
+                <div className="relative z-10 px-4 sm:px-5 py-2.5 sm:py-3 flex flex-col justify-center max-w-[62%] md:max-w-full">
                   {givenName && (
                     <span className="text-[9px] sm:text-[10px] md:text-xs font-mono font-semibold uppercase tracking-widest text-zinc-400 truncate mb-0.5">
                       {givenName}
@@ -415,7 +444,7 @@ export default function Podium({
                 </div>
 
                 {/* ── CARD BOTTOM: TIME / GAP & POINTS TELEMETRY ROW ── */}
-                <div className="relative z-10 px-4 sm:px-5 py-2 sm:py-2.5 md:py-3 border-t border-white/5 bg-zinc-950/60 flex items-end justify-between">
+                <div className="relative z-10 px-4 sm:px-5 py-2 sm:py-2.5 md:py-3 border-t border-white/5 bg-zinc-950/75 backdrop-blur-sm flex items-end justify-between">
                   {/* Left: Time or Gap */}
                   <div className="flex flex-col">
                     <span className="text-xs sm:text-sm md:text-base font-mono font-black text-white tracking-tight tabular-nums">
@@ -442,11 +471,11 @@ export default function Podium({
         })}
       </div>
 
-      {/* ── INTEGRATED CHAMPIONSHIP SUMMARY BAR (COMPACT & RESPONSIVE) ── */}
+      {/* ── INTEGRATED CHAMPIONSHIP SUMMARY BAR (ALIGNED & MATCHING CARDS) ── */}
       <Link
         href="#drivers-standings"
         aria-label="View Full Driver Championship Standings"
-        className="podium-summary-anim group relative z-20 w-full max-w-full mt-1 sm:mt-2 rounded-xl sm:rounded-2xl border border-zinc-800/90 bg-gradient-to-r from-[#0c0e14] via-[#10131a] to-[#0c0e14] px-3 py-2.5 sm:px-5 sm:py-3 md:px-6 md:py-3.5 shadow-xl flex flex-col md:flex-row items-center justify-between gap-2.5 sm:gap-3 md:gap-4 transition-all duration-300 hover:border-zinc-700 hover:bg-zinc-900/60 overflow-hidden"
+        className="podium-summary-anim group relative z-20 w-full max-w-[360px] sm:max-w-[400px] md:max-w-[960px] lg:max-w-[1040px] mx-auto mt-2 sm:mt-3 rounded-xl sm:rounded-2xl border border-zinc-800/90 bg-gradient-to-r from-[#0c0e14] via-[#10131a] to-[#0c0e14] px-4 py-3 sm:px-5 sm:py-3 md:px-6 md:py-3.5 shadow-xl flex flex-col md:flex-row items-center justify-between gap-2.5 sm:gap-3 md:gap-4 transition-all duration-300 hover:border-zinc-700 hover:bg-zinc-900/60 overflow-hidden"
       >
         {/* Left Side: Slanted Hazard Accents + F1 Mark + Championship Title */}
         <div className="flex items-center gap-2 sm:gap-3 w-full md:w-auto justify-between sm:justify-start">
@@ -480,7 +509,6 @@ export default function Podium({
         <div className="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-4 md:gap-8 w-full md:w-auto border-t md:border-t-0 border-white/5 pt-2 md:pt-0 min-w-0">
           {summaryStandings.map((s, idx) => {
             const isLeader = s.position === 1;
-            const itemTeamHex = getCleanHex(s.team_colour);
 
             return (
               <div
