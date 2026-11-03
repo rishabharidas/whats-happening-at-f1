@@ -32,6 +32,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased max-w-full overflow-x-hidden`}
     >
       <head>
@@ -41,11 +42,11 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-full w-full max-w-full overflow-x-hidden flex flex-col relative bg-[#0a0a0a] text-zinc-100 selection:bg-red-600 selection:text-white">
+      <body suppressHydrationWarning className="min-h-full w-full max-w-full overflow-x-hidden flex flex-col relative bg-[#0a0a0a] text-zinc-100 selection:bg-red-600 selection:text-white">
         <F1InitialStartSequence />
         <SmoothScroll>
           <NavigationBar />
-          <div className="pt-16 sm:pt-18 md:pt-20 w-full max-w-full overflow-x-hidden flex-1">{children}</div>
+          <div className="pt-[88px] sm:pt-[84px] md:pt-[84px] w-full max-w-full overflow-x-hidden flex-1">{children}</div>
           <Footer />
         </SmoothScroll>
       </body>

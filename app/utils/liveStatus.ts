@@ -826,7 +826,8 @@ export async function getLiveStatus(): Promise<LiveStatusData> {
     } else if (recentSession) {
       const recentTiming = checkSessionTiming(recentSession.dateStart, recentSession.sessionName, now);
       const timeSinceRecent = now.getTime() - recentTiming.endTime.getTime();
-      if (timeSinceRecent >= 0 && timeSinceRecent <= 24 * 3600 * 1000) {
+      // Immediately after checkered flag (within 4 hours), show completed. Beyond that, transition to next GP window
+      if (timeSinceRecent >= 0 && timeSinceRecent <= 4 * 3600 * 1000) {
         phase = "SESSION_COMPLETED";
       } else if (nextSession) {
         const timeUntilNext = new Date(nextSession.dateStart).getTime() - now.getTime();

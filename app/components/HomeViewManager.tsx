@@ -231,6 +231,19 @@ export default function HomeViewManager({
     ? checkSessionTiming(nextSession.dateStart, nextSession.sessionName, now)
     : null;
 
+  // Check if recent session belongs to the current/featured Grand Prix weekend
+  const isRecentInFeaturedWeekend = Boolean(
+    statusData?.recentSession &&
+    featured?.raceName &&
+    (statusData.recentSession.raceName.toLowerCase().includes(featured.location?.toLowerCase() || "") ||
+     (featured.country && statusData.recentSession.country && featured.country.toLowerCase().includes(statusData.recentSession.country.toLowerCase())) ||
+     statusData.recentSession.raceName === featured.raceName)
+  );
+
+  const isRecentFresh =
+    Boolean(recentTiming?.isPast &&
+    (now.getTime() - recentTiming.endTime.getTime()) <= 4 * 3600 * 1000);
+
   // Status badge config
   let statusBadgeLabel = "SCHEDULED";
   let statusBadgeColor = "text-zinc-400 bg-zinc-800/80 border-zinc-700/60";
@@ -251,11 +264,8 @@ export default function HomeViewManager({
     statusIndicatorDot = "bg-amber-400 animate-pulse";
     statusHeadline = `${nextSession?.sessionName || "Session"} In Progress`;
     statusSubtext = "No live telemetry received so far";
-  } else if (
-    phase === "SESSION_COMPLETED" ||
-    (recentTiming?.isPast && (now.getTime() - recentTiming.endTime.getTime()) <= 36 * 3600 * 1000)
-  ) {
-    // Session completed according to clock time
+  } else if (isRecentInFeaturedWeekend && isRecentFresh) {
+    // Current weekend session completed within the last 4 hours
     const sessionName = statusData?.recentSession?.sessionName || "Session";
     const raceName = statusData?.recentSession?.raceName?.replace("Grand Prix", "GP") || "Grand Prix";
     if (!hasTelemetry) {
@@ -269,7 +279,7 @@ export default function HomeViewManager({
       statusBadgeColor = "text-zinc-300 bg-zinc-800 border-zinc-700";
       statusIndicatorDot = "bg-zinc-400";
       statusHeadline = `${raceName} ${sessionName} Finished`;
-      statusSubtext = "Official results published";
+      statusSubtext = "Official results published in Race Center";
     }
   } else if (
     phase === "UPCOMING_SESSION" ||
@@ -297,7 +307,7 @@ export default function HomeViewManager({
     statusBadgeColor = "text-zinc-400 bg-zinc-800/80 border-zinc-700/60";
     statusIndicatorDot = "bg-zinc-400";
     statusHeadline = `Next: ${nextSession?.sessionName || "Practice 1"}`;
-    statusSubtext = `${featured?.raceName?.replace("Grand Prix", "GP") || "São Paulo GP"} • Round ${featured?.round || "19"}`;
+    statusSubtext = `${featured?.raceName?.replace("Grand Prix", "GP") || "São Paulo GP"} • Round ${featured?.round || "20"}`;
   }
 
   // Driver leader resolution
@@ -351,7 +361,7 @@ export default function HomeViewManager({
       id="hero"
       className="w-full flex flex-col items-center px-3 sm:px-5 pt-1 sm:pt-2 pb-6 sm:pb-8"
     >
-      <div className="w-full max-w-6xl mx-auto flex flex-col gap-3 sm:gap-3.5">
+      <div className="w-full max-w-6xl mx-auto flex flex-col gap-3.5 sm:gap-4">
         {/* ========================================================= */}
         {/* CLEAN, MINIMAL HEADER BAR (WINDOWS 8 STYLE)               */}
         {/* ========================================================= */}
@@ -927,7 +937,7 @@ export default function HomeViewManager({
           {/* TILE 7: TEAM RADIO COMMS                                */}
           {/* ------------------------------------------------------- */}
           <Link
-            href="/explore"
+            href="/explore/radio"
             onMouseEnter={() => handleTileEnter("radio")}
             onMouseLeave={() => handleTileLeave("radio")}
             aria-label="Paddock Team Radio Comms"

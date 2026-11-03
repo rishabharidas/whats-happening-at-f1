@@ -6,7 +6,7 @@ export default function ExploreGateway() {
       title: "Team Radios & Comms",
       subtitle: "Audio Experience",
       desc: "Stream authentic, unfiltered pit-to-car communications, dramatic team orders, and high-speed telemetry reactions.",
-      href: "/explore",
+      href: "/explore/radio",
       badge: "Audio Center",
       badgeColor: "text-amber-400 bg-amber-950/60 border-amber-600/40",
       accentBorder: "hover:border-amber-500/60",

@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 
 export default function PaddockAudioCenter() {
   return (
@@ -6,11 +7,21 @@ export default function PaddockAudioCenter() {
       <div className="absolute inset-0 bg-gradient-to-br from-red-600/5 via-transparent to-transparent pointer-events-none" />
 
       {/* Header */}
-      <div className="flex items-center gap-4 border-b border-zinc-800 pb-4">
-        <div className="h-8 w-1 bg-red-600" />
-        <h3 className="text-2xl font-black italic uppercase text-white tracking-tighter">
-          Paddock <span className="text-red-600">Audio Center</span>
-        </h3>
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-800 pb-4">
+        <div className="flex items-center gap-4">
+          <div className="h-8 w-1 bg-red-600" />
+          <h3 className="text-2xl font-black italic uppercase text-white tracking-tighter">
+            Paddock <span className="text-red-600">Audio Center</span>
+          </h3>
+        </div>
+
+        <Link
+          href="/explore/radio"
+          className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-red-600/15 hover:bg-red-600 border border-red-500/30 hover:border-red-500 text-red-400 hover:text-white text-xs font-mono font-bold uppercase tracking-wider transition-all"
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+          <span>Launch Team Radio Console &rarr;</span>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch w-full">

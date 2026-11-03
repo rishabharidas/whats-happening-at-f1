@@ -17,9 +17,8 @@ export default function NavigationBar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      // Find the hero section to calculate height dynamically
-      const heroSection = document.getElementById("hero");
-      const threshold = heroSection ? heroSection.offsetHeight - 200 : 100;
+      // Minimize promptly once scrolling starts (after ~50px) instead of waiting for a whole section
+      const threshold = 50;
 
       if (window.scrollY > threshold) {
         setIsScrolled((prev) => {
@@ -46,7 +45,7 @@ export default function NavigationBar() {
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     // Initial run to determine state
     handleScroll();
 
@@ -338,6 +337,17 @@ export default function NavigationBar() {
                 className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-mono font-bold text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
               >
                 <span>Tech Lexicon</span>
+              </Link>
+              <Link
+                href="/explore/radio"
+                onClick={() => {
+                  setIsMoreOpen(false);
+                  setIsMenuOpen(false);
+                }}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-mono font-bold text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                <span>Team Radio</span>
               </Link>
             </div>
           )}
