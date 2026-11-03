@@ -355,6 +355,42 @@ export default function HomeViewManager({
   const headlineB = newsArticles[1]?.title || "Sainz seals commanding victory in Mexico City Grand Prix";
   const sourceB = newsArticles[1]?.source?.name || "Autosport";
 
+  // Dynamic Context-Aware Header Badge
+  let headerBadgeText = "SCHEDULED";
+  let headerBadgeStyle = "bg-zinc-800/80 border-zinc-700/60 text-zinc-300";
+  let headerDotStyle = "bg-zinc-400";
+
+  if (isLive) {
+    headerBadgeText = "LIVE";
+    headerBadgeStyle = "bg-red-600/90 border-red-500 text-white shadow-sm shadow-red-600/30";
+    headerDotStyle = "bg-white animate-ping";
+  } else if (nextTiming?.isOngoing) {
+    headerBadgeText = "ON TRACK";
+    headerBadgeStyle = "bg-amber-950/60 border-amber-600/40 text-amber-400";
+    headerDotStyle = "bg-amber-400 animate-pulse";
+  } else if (
+    phase === "UPCOMING_SESSION" ||
+    (nextTiming &&
+      nextTiming.startTime.getTime() - now.getTime() <= 3 * 3600 * 1000 &&
+      nextTiming.startTime.getTime() - now.getTime() > 0)
+  ) {
+    headerBadgeText = "STARTING SOON";
+    headerBadgeStyle = "bg-amber-950/60 border-amber-600/40 text-amber-400";
+    headerDotStyle = "bg-amber-400 animate-pulse";
+  } else if (isRecentInFeaturedWeekend && isRecentFresh) {
+    headerBadgeText = "FINISHED";
+    headerBadgeStyle = "bg-zinc-800 border-zinc-700 text-zinc-300";
+    headerDotStyle = "bg-zinc-400";
+  } else if (countdown && !countdown.passed && countdown.days <= 7) {
+    headerBadgeText = "RACE WEEK";
+    headerBadgeStyle = "bg-cyan-950/60 border-cyan-600/40 text-cyan-300";
+    headerDotStyle = "bg-cyan-400";
+  } else {
+    headerBadgeText = "UPCOMING";
+    headerBadgeStyle = "bg-zinc-800/80 border-zinc-700/60 text-zinc-400";
+    headerDotStyle = "bg-zinc-500";
+  }
+
   return (
     <div
       ref={containerRef}
@@ -376,11 +412,13 @@ export default function HomeViewManager({
 
           <div className="flex items-center gap-2 text-xs font-mono text-zinc-300">
             <span className="text-[10px] sm:text-xs text-zinc-400">
-              Round {featured?.round || "19"} • {featured?.raceName ? featured.raceName.replace("Grand Prix", "GP") : "São Paulo GP"}
+              Round {featured?.round || "20"} • {featured?.raceName ? featured.raceName.replace("Grand Prix", "GP") : "São Paulo GP"}
             </span>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-600/40 text-emerald-400 text-[10px] font-bold">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>LIVE</span>
+            <span
+              className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[10px] font-bold ${headerBadgeStyle}`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${headerDotStyle}`} />
+              <span>{headerBadgeText}</span>
             </span>
           </div>
         </header>

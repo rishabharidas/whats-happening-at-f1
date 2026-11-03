@@ -209,11 +209,17 @@ export default function HeroSection({ statusData }: HeroSectionProps) {
         <div className="hero-anim-header flex flex-wrap items-center justify-between gap-3 px-3.5 sm:px-5 py-2.5 rounded-xl bg-zinc-950/80 border border-zinc-800/90 shadow-lg backdrop-blur-md">
           <div className="flex items-center gap-2.5">
             <span className="flex h-2.5 w-2.5 relative">
-              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${isLive ? "bg-red-400" : "bg-emerald-400"} opacity-75`} />
-              <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isLive ? "bg-red-600" : "bg-emerald-500"}`} />
+              {isLive ? (
+                <>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600" />
+                </>
+              ) : (
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-400" />
+              )}
             </span>
             <span className="text-[11px] sm:text-xs font-mono font-bold tracking-widest uppercase text-white">
-              {isLive ? "LIVE TRACK SESSION ACTIVE" : `RACE WEEKEND // ROUND ${featured?.round || "18"}`}
+              {isLive ? "LIVE TRACK SESSION ACTIVE" : `RACE WEEKEND // ROUND ${featured?.round || "20"}`}
             </span>
             <span className="hidden sm:inline text-zinc-600 font-mono text-xs">|</span>
             <span className="hidden sm:inline text-xs font-mono text-zinc-400 truncate max-w-xs">
